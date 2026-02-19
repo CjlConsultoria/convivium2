@@ -6,14 +6,12 @@ import BaseButton from '@/components/base/BaseButton.vue'
 import BaseBadge from '@/components/base/BaseBadge.vue'
 import BaseLoadingSpinner from '@/components/base/BaseLoadingSpinner.vue'
 import { useAuthStore } from '@/stores/auth.store'
-import { useTenantStore } from '@/stores/tenant.store'
 import { dashboardApi } from '@/api'
-import { formatDate, timeAgo } from '@/utils/formatters'
+import { timeAgo } from '@/utils/formatters'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
-const tenantStore = useTenantStore()
 
 const condoId = computed(() => Number(route.params.condoId))
 const loading = ref(true)

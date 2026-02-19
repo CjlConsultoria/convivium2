@@ -8,7 +8,6 @@ import BaseBadge from '@/components/base/BaseBadge.vue'
 import BasePagination from '@/components/base/BasePagination.vue'
 import { parcelApi } from '@/api'
 import { PARCEL_STATUS_LABELS } from '@/types/parcel.types'
-import type { ParcelStatus } from '@/types/parcel.types'
 import { formatDateTime } from '@/utils/formatters'
 
 const route = useRoute()

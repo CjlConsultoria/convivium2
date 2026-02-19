@@ -6,7 +6,7 @@ import BaseBadge from '@/components/base/BaseBadge.vue'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseLoadingSpinner from '@/components/base/BaseLoadingSpinner.vue'
 import { condominiumApi } from '@/api'
-import { formatDate, formatCurrency } from '@/utils/formatters'
+import { formatDate } from '@/utils/formatters'
 
 const loading = ref(true)
 const error = ref('')

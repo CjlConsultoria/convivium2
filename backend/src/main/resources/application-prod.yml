@@ -1,4 +1,4 @@
-# Perfil produção (Render). Ative com: spring.profiles.active=production
+# Perfil prod (Render). Igual a production; ative com: spring.profiles.active=prod
 # DataSource: ProductionDataSourceConfig cria o bean a partir de SPRING_DATASOURCE_* ou DATABASE_URL.
 
 spring:

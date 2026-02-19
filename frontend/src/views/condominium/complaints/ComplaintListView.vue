@@ -7,7 +7,6 @@ import BaseTable from '@/components/base/BaseTable.vue'
 import BaseBadge from '@/components/base/BaseBadge.vue'
 import BasePagination from '@/components/base/BasePagination.vue'
 import { complaintApi } from '@/api'
-import type { ComplaintStatus } from '@/types/complaint.types'
 import {
   COMPLAINT_STATUS_LABELS,
   COMPLAINT_CATEGORY_LABELS,

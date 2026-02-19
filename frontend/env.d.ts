@@ -6,14 +6,8 @@ declare module '*.vue' {
   export default component
 }
 
-declare module 'vue-router' {
-  interface RouteMeta {
-    layout?: 'default' | 'auth' | 'admin'
-    public?: boolean
-    requiresAdmin?: boolean
-    roles?: string[]
-  }
-}
+// RouteMeta ampliado em src/router/index.ts ou onde meta é definido (evita shadowing do vue-router no build)
+// Se precisar de meta.layout etc. tipados, use: as { layout?: 'default' | 'auth' | 'admin'; ... }
 
 interface ImportMetaEnv {
   readonly VITE_API_URL: string

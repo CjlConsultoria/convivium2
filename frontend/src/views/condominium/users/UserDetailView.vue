@@ -175,11 +175,13 @@ async function loadUnitsForApprove() {
     const buildings = buildingsRes.data ?? []
     const units = unitsRes.data ?? []
     const byBuilding = Object.fromEntries(buildings.map((b: { id: number; name: string }) => [b.id, b.name]))
-    unitsForApprove.value = units.map((u: { id: number; buildingId: number; identifier: string }) => ({
-      id: u.id,
-      buildingName: byBuilding[u.buildingId] ?? '',
-      identifier: u.identifier,
-    }))
+    unitsForApprove.value = units
+      .filter((u): u is Unit & { buildingId: number } => u.buildingId != null)
+      .map((u) => ({
+        id: u.id,
+        buildingName: byBuilding[u.buildingId] ?? '',
+        identifier: u.identifier,
+      }))
     if (currentRole.value?.unitId) approveUnitId.value = currentRole.value.unitId
     else if (unitsForApprove.value.length) approveUnitId.value = unitsForApprove.value[0].id
   } catch {

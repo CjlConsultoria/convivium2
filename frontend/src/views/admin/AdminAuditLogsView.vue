@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import BaseCard from '@/components/base/BaseCard.vue'
-import BaseAlert from '@/components/base/BaseAlert.vue'
 
 // Audit logs will be populated once the backend audit logging module is implemented (Phase 2)
-const logs = ref<Record<string, any>[]>([])
 </script>
 
 <template>
