@@ -9,6 +9,9 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
+  preview: {
+    allowedHosts: ['convivium-front.onrender.com'],
+  },
   server: {
     port: 5173,
     proxy: {
