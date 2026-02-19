@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(java -version:*)",
+      "Bash(mvn:*)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(npx vue-tsc:*)",
+      "Bash(npx vite build)",
+      "Bash(where:*)",
+      "Bash(dir:*)",
+      "Bash(dir \"C:\\\\tools\\\\*maven*\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\ritad\\\\.m2\\\\wrapper\\\\*\" /b)",
+      "Bash(echo:*)",
+      "Bash(export JAVA_HOME=\"C:\\\\Program Files\\\\Java\\\\jdk-21\")",
+      "Bash(\"$JAVA_HOME/bin/java\" -version)",
+      "Bash(cmd.exe /c \"set JAVA_HOME=C:\\\\Program Files\\\\Java\\\\jdk-21&& mvnw.cmd compile -q\")",
+      "Bash(powershell -Command:*)",
+      "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" PATH=\"$JAVA_HOME/bin:$PATH\" cd:*)",
+      "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" PATH=\"$JAVA_HOME/bin:$PATH\" cmd //c \"set \"\"JAVA_HOME=C:\\\\Program Files\\\\Java\\\\jdk-21\"\" && mvnw.cmd compile\")",
+      "Bash(export JAVA_HOME=\"/c/Program Files/Java/jdk-21\")",
+      "Bash(export PATH=\"$JAVA_HOME/bin:$PATH\")",
+      "Bash(java -cp \".mvn/wrapper/maven-wrapper.jar\" org.apache.maven.wrapper.MavenWrapperMain compile:*)",
+      "Bash(export JAVA_HOME=\"C:/Program Files/Java/jdk-21\")",
+      "Bash(curl:*)",
+      "Bash(\"C:\\\\GIT\\\\Convivium 2.0\\\\backend\\\\mvnw.cmd\" help:evaluate -Dexpression=lombok.version -q -DforceStdout -f \"C:\\\\GIT\\\\Convivium 2.0\\\\backend\\\\pom.xml\")",
+      "Bash(cmd /c \"mvnw.cmd help:evaluate -Dexpression=lombok.version -q -DforceStdout\")",
+      "Bash(cmd /c:*)",
+      "Bash(./mvnw.cmd compile)",
+      "Bash(\"/c/Program Files/Java/jdk-21/bin/java.exe\" -cp \"target/classes;C:/Users/ritad/.m2/repository/org/springframework/security/spring-security-crypto/6.3.4/spring-security-crypto-6.3.4.jar\" -e \"import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; public class H { public static void main\\(String[] a\\) { System.out.println\\(new BCryptPasswordEncoder\\(\\).encode\\(\"\"Admin@123\"\"\\)\\); } }\")",
+      "Bash(\"/c/Program Files/Java/jdk-21/bin/javac.exe\" -cp \"target/classes;C:/Users/ritad/.m2/repository/org/springframework/security/spring-security-crypto/6.3.4/spring-security-crypto-6.3.4.jar\" GenHash.java)",
+      "Bash(\"/c/Program Files/Java/jdk-21/bin/java.exe\" -cp \".;target/classes;C:/Users/ritad/.m2/repository/org/springframework/security/spring-security-crypto/6.3.4/spring-security-crypto-6.3.4.jar\" GenHash)",
+      "Bash(\"/c/Program Files/Java/jdk-21/bin/javac.exe\" -cp \"C:/Users/ritad/.m2/repository/org/springframework/security/spring-security-crypto/6.3.4/spring-security-crypto-6.3.4.jar\" GenHash.java)",
+      "Bash(\"/c/Program Files/Java/jdk-21/bin/java.exe\":*)"
+    ]
+  }
+}

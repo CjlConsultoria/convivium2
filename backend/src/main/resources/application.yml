@@ -1,0 +1,101 @@
+spring:
+  application:
+    name: convivium-backend
+  # Carrega application-local.yml (Stripe etc.) se existir; não quebra se não existir
+  profiles:
+    include: local
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/convivium
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  mail:
+    host: localhost
+    port: 1025
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: c29tZS1zdXBlci1zZWNyZXQta2V5LWZvci1jb252aXZpdW0tand0LXRva2VuLWdlbmVyYXRpb24tbXVzdC1iZS1sb25n
+    access-token-expiration: 900000    # 15 minutes
+    refresh-token-expiration: 604800000 # 7 days
+
+  # Login com Google (cadastro do morador)
+  google:
+    client-id: ""  # Opcional: valida que o token veio do seu app (ex: xxx.apps.googleusercontent.com)
+
+  cors:
+    allowed-origins: http://localhost:5173
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    allowed-headers: "*"
+
+  # WhatsApp via Meta (Cloud API) - comunicados e notificação de encomendas
+  whatsapp:
+    enabled: false
+    phone-number-id: ""   # ID do número WhatsApp Business (Meta)
+    access-token: ""      # Token de acesso permanente (Meta Business)
+    base-url: "http://localhost:8080"  # URL pública do backend (para link da foto no WhatsApp)
+    template:
+      encomenda: "encomenda_na_portaria"  # Nome do template aprovado no Meta
+
+  # Stripe (pagamentos). Chave em application-local.yml (perfil "local"). Ver docs/STRIPE-CONFIG.md.
+  stripe:
+    enabled: false
+    secret-key: ""       # ou use perfil "local" com application-local.yml
+    webhook-secret: ""   # whsec_... (assinatura do webhook)
+    success-url: "http://localhost:5173/c/{condoId}/financial?payment=success"
+    cancel-url: "http://localhost:5173/c/{condoId}/financial?payment=cancel"
+
+  storage:
+    # local = pasta do sistema (desenvolvimento). s3 = S3/MinIO (produção, ex: Render)
+    type: local
+    local:
+      path: ./uploads
+    # S3 / MinIO (usado quando type: s3). No Render: defina STORAGE_TYPE=s3 e as env vars abaixo
+    endpoint: http://localhost:9000
+    access-key: minioadmin
+    secret-key: minioadmin
+    bucket-name: convivium
+    region: us-east-1
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+logging:
+  level:
+    com.convivium: DEBUG
+    org.springframework.security: DEBUG

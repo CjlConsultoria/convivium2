@@ -1,0 +1,31 @@
+# Perfil produção (ex.: Render). Ative com: spring.profiles.active=production
+# Defina as variáveis de ambiente no painel do Render.
+
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME:}
+    password: ${DATABASE_PASSWORD:}
+
+app:
+  storage:
+    type: ${APP_STORAGE_TYPE:local}
+    endpoint: ${APP_STORAGE_ENDPOINT:}
+    region: ${APP_STORAGE_REGION:us-east-1}
+    bucket-name: ${APP_STORAGE_BUCKET_NAME:convivium}
+    access-key: ${APP_STORAGE_ACCESS_KEY:}
+    secret-key: ${APP_STORAGE_SECRET_KEY:}
+
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+  jwt:
+    secret: ${JWT_SECRET}
+
+  whatsapp:
+    enabled: ${APP_WHATSAPP_ENABLED:false}
+    phone-number-id: ${APP_WHATSAPP_PHONE_NUMBER_ID:}
+    access-token: ${APP_WHATSAPP_ACCESS_TOKEN:}
+    base-url: ${APP_WHATSAPP_BASE_URL:${APP_URL:}}
+    template:
+      encomenda: ${APP_WHATSAPP_TEMPLATE_ENCOMENDA:encomenda_na_portaria}
