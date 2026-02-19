@@ -14,7 +14,7 @@ import java.net.URI;
  * Ordem: SPRING_DATASOURCE_URL (sistema antigo), JDBC_DATABASE_URL, ou DATABASE_URL (postgresql://).
  */
 @Configuration
-@Profile("production")
+@Profile({"production", "prod"})
 public class ProductionDataSourceConfig {
 
     @Bean
