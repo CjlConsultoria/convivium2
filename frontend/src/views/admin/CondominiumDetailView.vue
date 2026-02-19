@@ -13,7 +13,7 @@ import type {
   UnitPreviewItem,
 } from '@/api/modules/condominium.api'
 import type { Condominium, Building, Unit } from '@/types/condominium.types'
-import { formatDate, formatCNPJ, formatPhone } from '@/utils/formatters'
+import { formatCNPJ, formatPhone } from '@/utils/formatters'
 
 const route = useRoute()
 const router = useRouter()

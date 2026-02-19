@@ -7,7 +7,7 @@ import BaseSelect from '@/components/base/BaseSelect.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import { userApi, condominiumApi } from '@/api'
-import type { Role, UserCreateRequest } from '@/types/user.types'
+import type { UserCreateRequest } from '@/types/user.types'
 import { ROLE_LABELS } from '@/types/user.types'
 import type { Unit } from '@/types/condominium.types'
 

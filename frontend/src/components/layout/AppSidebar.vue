@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 interface NavItem {
   label: string
@@ -25,7 +25,6 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<{ toggle: [] }>()
 const route = useRoute()
-const router = useRouter()
 
 // Cascata: grupos expansíveis (por índice). Inicialmente abertos os que contêm a rota ativa.
 const expandedGroups = ref<Set<number>>(new Set())

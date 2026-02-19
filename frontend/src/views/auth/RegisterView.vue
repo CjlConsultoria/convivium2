@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import BaseInput from '@/components/base/BaseInput.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseSelect from '@/components/base/BaseSelect.vue'
 import { authApi } from '@/api'
 import type { CondominiumOption, UnitOption } from '@/api/modules/auth.api'
-
-const router = useRouter()
 
 const form = ref({
   name: '',

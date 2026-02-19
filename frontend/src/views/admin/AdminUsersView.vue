@@ -7,7 +7,6 @@ import BaseBadge from '@/components/base/BaseBadge.vue'
 import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseLoadingSpinner from '@/components/base/BaseLoadingSpinner.vue'
 import { condominiumApi } from '@/api'
-import apiClient from '@/api/client'
 import { formatDate } from '@/utils/formatters'
 
 const router = useRouter()

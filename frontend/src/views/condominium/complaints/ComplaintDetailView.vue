@@ -9,7 +9,7 @@ import BaseAlert from '@/components/base/BaseAlert.vue'
 import BaseLoadingSpinner from '@/components/base/BaseLoadingSpinner.vue'
 import { complaintApi } from '@/api'
 import { useAuthStore } from '@/stores/auth.store'
-import type { ComplaintDetail, ComplaintResponseItem, ComplaintStatus } from '@/types/complaint.types'
+import type { ComplaintDetail, ComplaintStatus } from '@/types/complaint.types'
 import {
   COMPLAINT_STATUS_LABELS,
   COMPLAINT_CATEGORY_LABELS,
@@ -243,7 +243,7 @@ function goBack() {
               Marcar em Analise
             </BaseButton>
             <BaseButton
-              v-if="complaint.status !== 'RESOLVED' && complaint.status !== 'CLOSED'"
+              v-if="complaint.status !== 'RESOLVED' && (complaint.status as ComplaintStatus) !== 'CLOSED'"
               variant="primary"
               size="sm"
               :loading="updatingStatus"

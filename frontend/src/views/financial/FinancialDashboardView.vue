@@ -43,6 +43,14 @@ const columns = [
   { key: 'status', label: 'Status' },
 ]
 
+const rawInvoices = ref<Array<{
+  referenceMonth: string
+  referenceDisplay: string
+  amountCents: number
+  status: string
+  paidAt: string | null
+}>>([])
+
 const invoices = ref<Array<{
   referenceDisplay: string
   description: string
