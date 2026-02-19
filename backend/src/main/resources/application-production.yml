@@ -1,11 +1,34 @@
-# Perfil produção (ex.: Render). Ative com: spring.profiles.active=production
-# Banco: use DATABASE_URL (Internal Database URL do Render) ou JDBC_DATABASE_URL + USERNAME + PASSWORD.
-# O DataSource é configurado por ProductionDataSourceConfig a partir de DATABASE_URL.
+# Perfil produção (Render). Ative com: spring.profiles.active=production
+# DataSource: ProductionDataSourceConfig cria o bean a partir de SPRING_DATASOURCE_* ou DATABASE_URL.
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
+
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+
+  datasource:
+    hikari:
+      minimum-idle: 2
+      maximum-pool-size: 10
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      pool-name: PostgreSQLHikariCP
+
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+        show_sql: false
+    show-sql: false
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /convivium
 
 app:
   storage:
@@ -17,7 +40,7 @@ app:
     secret-key: ${APP_STORAGE_SECRET_KEY:}
 
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:${APP_FRONTEND_URL:http://localhost:5173}}
 
   jwt:
     secret: ${JWT_SECRET}

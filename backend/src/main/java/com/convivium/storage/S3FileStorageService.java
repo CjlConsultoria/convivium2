@@ -11,6 +11,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
@@ -39,6 +40,9 @@ public class S3FileStorageService implements FileStorageService {
 
         if (endpoint != null && !endpoint.isBlank()) {
             builder.endpointOverride(URI.create(endpoint));
+            // Path-style obrigatório para Backblaze B2 e outros S3-compatible (MinIO, R2)
+            builder.serviceConfiguration(
+                    S3Configuration.builder().pathStyleAccessEnabled(true).build());
         }
         if (accessKey != null && !accessKey.isBlank() && secretKey != null && !secretKey.isBlank()) {
             builder.credentialsProvider(

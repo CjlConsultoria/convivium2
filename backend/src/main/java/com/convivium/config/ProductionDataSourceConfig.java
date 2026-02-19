@@ -10,9 +10,8 @@ import javax.sql.DataSource;
 import java.net.URI;
 
 /**
- * Configura o DataSource em produção para Render/Heroku.
- * Usa JDBC_DATABASE_URL se definido; senão converte DATABASE_URL (postgresql://...) para JDBC.
- * No Render, vincule o PostgreSQL ao serviço e defina DATABASE_URL (ou use Internal Database URL).
+ * Configura o DataSource em produção (Render).
+ * Ordem: SPRING_DATASOURCE_URL (sistema antigo), JDBC_DATABASE_URL, ou DATABASE_URL (postgresql://).
  */
 @Configuration
 @Profile("production")
@@ -20,20 +19,34 @@ public class ProductionDataSourceConfig {
 
     @Bean
     public DataSource dataSource(Environment env) {
-        String jdbcUrl = env.getProperty("JDBC_DATABASE_URL");
+        // 1) Variáveis do sistema antigo (como no Render atual)
+        String jdbcUrl = env.getProperty("SPRING_DATASOURCE_URL");
+        if (jdbcUrl != null && jdbcUrl.startsWith("jdbc:postgresql://")) {
+            HikariDataSource ds = new HikariDataSource();
+            ds.setJdbcUrl(jdbcUrl);
+            ds.setUsername(env.getProperty("SPRING_DATASOURCE_USERNAME", ""));
+            ds.setPassword(env.getProperty("SPRING_DATASOURCE_PASSWORD", ""));
+            ds.setDriverClassName("org.postgresql.Driver");
+            applyHikariSettings(ds);
+            return ds;
+        }
+
+        jdbcUrl = env.getProperty("JDBC_DATABASE_URL");
         if (jdbcUrl != null && jdbcUrl.startsWith("jdbc:postgresql://")) {
             HikariDataSource ds = new HikariDataSource();
             ds.setJdbcUrl(jdbcUrl);
             ds.setUsername(env.getProperty("DATABASE_USERNAME", ""));
             ds.setPassword(env.getProperty("DATABASE_PASSWORD", ""));
             ds.setDriverClassName("org.postgresql.Driver");
+            applyHikariSettings(ds);
             return ds;
         }
 
+        // 2) DATABASE_URL (formato Render: postgresql://user:pass@host/db)
         String databaseUrl = env.getProperty("DATABASE_URL");
         if (databaseUrl == null || !databaseUrl.startsWith("postgresql://")) {
             throw new IllegalStateException(
-                "Em produção defina DATABASE_URL (ex.: Internal Database URL do Render) ou JDBC_DATABASE_URL.");
+                "Em produção defina SPRING_DATASOURCE_URL (JDBC) ou DATABASE_URL (Internal URL do Render).");
         }
 
         try {
@@ -59,9 +72,19 @@ public class ProductionDataSourceConfig {
             ds.setUsername(username);
             ds.setPassword(password);
             ds.setDriverClassName("org.postgresql.Driver");
+            applyHikariSettings(ds);
             return ds;
         } catch (Exception e) {
             throw new IllegalStateException("DATABASE_URL inválida: " + e.getMessage(), e);
         }
+    }
+
+    private static void applyHikariSettings(HikariDataSource ds) {
+        ds.setMinimumIdle(2);
+        ds.setMaximumPoolSize(10);
+        ds.setIdleTimeout(30000L);
+        ds.setMaxLifetime(1800000L);
+        ds.setConnectionTimeout(30000L);
+        ds.setPoolName("PostgreSQLHikariCP");
     }
 }
