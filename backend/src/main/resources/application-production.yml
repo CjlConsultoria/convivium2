@@ -1,11 +1,11 @@
 # Perfil produção (ex.: Render). Ative com: spring.profiles.active=production
-# Defina as variáveis de ambiente no painel do Render.
+# Banco: use DATABASE_URL (Internal Database URL do Render) ou JDBC_DATABASE_URL + USERNAME + PASSWORD.
+# O DataSource é configurado por ProductionDataSourceConfig a partir de DATABASE_URL.
 
 spring:
-  datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME:}
-    password: ${DATABASE_PASSWORD:}
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 
 app:
   storage:
