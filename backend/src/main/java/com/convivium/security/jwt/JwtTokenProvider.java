@@ -23,11 +23,19 @@ public class JwtTokenProvider {
     private final JwtProperties jwtProperties;
     private SecretKey signingKey;
 
+    /** HS256 exige chave com pelo menos 256 bits (32 bytes). */
+    private static final int MIN_SECRET_BYTES = 32;
+
     @PostConstruct
     public void init() {
-        this.signingKey = Keys.hmacShaKeyFor(
-                jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8)
-        );
+        byte[] secretBytes = jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8);
+        if (secretBytes.length < MIN_SECRET_BYTES) {
+            throw new IllegalStateException(
+                "JWT_SECRET deve ter pelo menos 32 caracteres (256 bits) para HMAC-SHA256. "
+                + "Defina a variável de ambiente JWT_SECRET no Render (ou em produção) com um valor longo e seguro."
+            );
+        }
+        this.signingKey = Keys.hmacShaKeyFor(secretBytes);
     }
 
     public String generateAccessToken(String userUuid, String email,
