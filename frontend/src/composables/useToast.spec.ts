@@ -14,7 +14,7 @@ describe('useToast', () => {
   })
 
   it('adiciona toast e remove após duração', () => {
-    const { toasts, showToast, removeToast } = useToast()
+    const { toasts, showToast } = useToast()
     showToast('Mensagem', 'success', 1000)
     expect(toasts.value).toHaveLength(1)
     expect(toasts.value[0].message).toBe('Mensagem')

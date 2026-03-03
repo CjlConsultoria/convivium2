@@ -34,7 +34,7 @@ describe('usePagination', () => {
   })
 
   it('nextPage incrementa quando há próxima página', () => {
-    const { page, totalPages, updateFromResponse, nextPage } = usePagination()
+    const { page, updateFromResponse, nextPage } = usePagination()
     updateFromResponse({
       content: [],
       page: 0,
