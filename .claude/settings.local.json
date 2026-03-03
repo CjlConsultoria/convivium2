@@ -31,7 +31,24 @@
       "Bash(\"/c/Program Files/Java/jdk-21/bin/javac.exe\" -cp \"target/classes;C:/Users/ritad/.m2/repository/org/springframework/security/spring-security-crypto/6.3.4/spring-security-crypto-6.3.4.jar\" GenHash.java)",
       "Bash(\"/c/Program Files/Java/jdk-21/bin/java.exe\" -cp \".;target/classes;C:/Users/ritad/.m2/repository/org/springframework/security/spring-security-crypto/6.3.4/spring-security-crypto-6.3.4.jar\" GenHash)",
       "Bash(\"/c/Program Files/Java/jdk-21/bin/javac.exe\" -cp \"C:/Users/ritad/.m2/repository/org/springframework/security/spring-security-crypto/6.3.4/spring-security-crypto-6.3.4.jar\" GenHash.java)",
-      "Bash(\"/c/Program Files/Java/jdk-21/bin/java.exe\":*)"
+      "Bash(\"/c/Program Files/Java/jdk-21/bin/java.exe\":*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nci: add CI/CD pipeline with SonarCloud and Render deploy\n\n- GitHub Actions workflow with backend build \\(Java 21/Maven\\), frontend build \\(Node 20/npm\\), SonarCloud analysis, and Render deploy hooks\n- SonarCloud multi-module config for Java backend and Vue/TypeScript frontend\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" status)",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" add frontend/package.json frontend/package-lock.json frontend/vitest.config.ts \"frontend/src/test/\" \"frontend/src/**/*.spec.ts\" backend/pom.xml \"backend/src/test/\")",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" commit -m \"$\\(cat <<''EOF''\nfeat: add test infrastructure and unit tests\n\nBackend:\n- Add JaCoCo coverage plugin to pom.xml\n- Add unit tests for AuthService, AuthController, JwtTokenProvider, CorsConfig, ApiResponse\n- Add application-test.yml for test profile\n\nFrontend:\n- Add Vitest + @vue/test-utils + jsdom + @vitest/coverage-v8\n- Add vitest.config.ts with coverage thresholds \\(70% lines/functions/statements, 65% branches\\)\n- Add test:coverage script to package.json\n- Add unit tests for stores, composables, utils, components, and API modules\n- Add test setup file\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" push origin main)",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" add frontend/src/utils/formatters.spec.ts frontend/src/composables/useToast.spec.ts backend/pom.xml .github/dependabot.yml frontend/vitest.config.ts)",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" commit -m \"$\\(cat <<''EOF''\nfix: test failures and dependabot PR noise\n\n- Fix formatters.spec.ts: use toContain for locale-dependent currency format\n- Fix formatters.spec.ts: correct timeAgo months test \\(59 days = 1 month, not 2\\)\n- Fix useToast.spec.ts: clear global toast state between tests\n- Remove JaCoCo check enforcement \\(let SonarCloud Quality Gate handle thresholds\\)\n- Group Dependabot PRs: all backend, prod/dev frontend, all actions\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" add .github/workflows/ci.yml .github/dependabot.yml frontend/vitest.config.ts frontend/src/utils/formatters.spec.ts frontend/src/composables/useToast.spec.ts backend/pom.xml)",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" commit -m \"$\\(cat <<''EOF''\nci: simplify to single pipeline job + monthly grouped dependabot\n\n- Merge all jobs into one sequential pipeline \\(build → test → security → sonar → deploy\\)\n- Dependabot: monthly interval, all deps grouped per ecosystem \\(max 3 PRs/month\\)\n- Fix frontend test assertions and coverage config\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(gh pr list:*)",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" add .github/workflows/ci.yml backend/src/test/java/com/convivium/config/CorsConfigTest.java)",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" commit -m \"$\\(cat <<''EOF''\nfix: CorsConfigTest compilation + pipeline with visible steps\n\n- Fix CorsConfigTest: use MockHttpServletRequest instead of String\n- Pipeline: 5 visual jobs \\(Backend → Frontend → Security → Quality → Deploy\\)\n- Backend and Frontend run in parallel, rest is sequential\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" add .github/workflows/auto-close-failed-pr.yml)",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" commit -m \"$\\(cat <<''EOF''\nci: auto-close PRs when pipeline fails\n\nAutomatically closes pull requests and adds a comment when the\nCI/CD pipeline fails, keeping the PR list clean.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }

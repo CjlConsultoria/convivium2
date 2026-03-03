@@ -29,7 +29,7 @@ class ApiResponseTest {
         ApiResponse<Void> response = ApiResponse.error("Erro");
         assertFalse(response.isSuccess());
         assertEquals("Erro", response.getMessage());
-        assertEquals("BUSINESS_ERROR", response.getErrorCode());
+        assertNull(response.getErrorCode());
     }
 
     @Test

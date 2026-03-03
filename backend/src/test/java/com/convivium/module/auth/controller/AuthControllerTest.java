@@ -1,14 +1,19 @@
 package com.convivium.module.auth.controller;
 
+import com.convivium.config.MockMvcSecurityConfig;
 import com.convivium.module.auth.dto.LoginRequest;
 import com.convivium.module.auth.dto.LoginResponse;
 import com.convivium.module.auth.dto.UserInfoResponse;
 import com.convivium.module.auth.service.AuthService;
+import com.convivium.module.condominium.repository.CondominiumRepository;
+import com.convivium.module.user.repository.UserRepository;
+import com.convivium.security.jwt.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -17,10 +22,12 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = AuthController.class, excludeAutoConfiguration = SecurityAutoConfiguration.class)
+@Import(MockMvcSecurityConfig.class)
 class AuthControllerTest {
 
     @Autowired
@@ -31,6 +38,15 @@ class AuthControllerTest {
 
     @MockBean
     private AuthService authService;
+
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    private UserRepository userRepository;
+
+    @MockBean
+    private CondominiumRepository condominiumRepository;
 
     @Test
     void login_returnsOkWhenValid() throws Exception {
@@ -44,7 +60,8 @@ class AuthControllerTest {
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new LoginRequest("a@b.com", "senha123"))))
+                        .content(objectMapper.writeValueAsString(new LoginRequest("a@b.com", "senha123")))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.accessToken").value("accessToken"));

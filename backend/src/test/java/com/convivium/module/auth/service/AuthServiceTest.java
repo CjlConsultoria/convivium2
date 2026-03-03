@@ -59,12 +59,6 @@ class AuthServiceTest {
     @InjectMocks
     private AuthService authService;
 
-    @BeforeEach
-    void setUp() {
-        when(jwtProperties.getAccessTokenExpiration()).thenReturn(900_000L);
-        when(jwtProperties.getRefreshTokenExpiration()).thenReturn(604_800_000L);
-    }
-
     @Test
     void login_throwsWhenUserNotFound() {
         when(userRepository.findByEmail("a@b.com")).thenReturn(Optional.empty());
@@ -89,6 +83,8 @@ class AuthServiceTest {
 
     @Test
     void login_returnsTokensWhenValid() {
+        when(jwtProperties.getAccessTokenExpiration()).thenReturn(900_000L);
+        when(jwtProperties.getRefreshTokenExpiration()).thenReturn(604_800_000L);
         User user = User.builder()
                 .id(1L)
                 .uuid(java.util.UUID.randomUUID())

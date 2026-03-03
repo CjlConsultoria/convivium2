@@ -33,9 +33,11 @@
 - `APP_STORAGE_REGION`: `auto`
 - Crie as chaves em R2 → Manage R2 API Tokens.
 
-**Backblaze B2**
+**Backblaze B2** (mais barato que S3; integração pronta)
 
-- Endpoint: `https://s3.<region>.backblazeb2.com`
-- Crie Application Key no bucket e use como access-key/secret-key.
+- `APP_STORAGE_ENDPOINT`: `https://s3.<região>.backblazeb2.com` (ex.: `https://s3.us-west-004.backblazeb2.com`)
+- `APP_STORAGE_REGION`: mesma do bucket (ex.: `us-west-004`)
+- Crie uma **Application Key** no bucket (não use a master key) e use keyID como access-key e applicationKey como secret-key.
+- Guia completo: [BACKBLAZE-B2.md](BACKBLAZE-B2.md).
 
 Depois de configurar, as fotos das encomendas passam a ser gravadas no storage configurado e as URLs retornadas apontam para esse storage.
