@@ -122,6 +122,14 @@ jobs:
           name: frontend-coverage
           path: frontend/coverage/
 
+      - name: Normalize lcov paths for SonarCloud
+        run: |
+          if [ -f frontend/coverage/lcov.info ]; then
+            sed -i 's|\\|/|g' frontend/coverage/lcov.info
+            echo "First SF paths in lcov:"
+            grep "^SF:" frontend/coverage/lcov.info | head -5
+          fi
+
       - name: Verify coverage reports
         run: |
           echo "=== Backend JaCoCo ==="
