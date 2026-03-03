@@ -35,7 +35,7 @@ describe('useAuth', () => {
     expect(hasRole('SINDICO')).toBe(true)
   })
 
-  it('delega hasPermission para authStore', () => {
+  it('delega hasPermission para authStore', async () => {
     const { useAuthStore } = await import('@/stores/auth.store')
     useAuthStore().user = { isPlatformAdmin: true } as any
 

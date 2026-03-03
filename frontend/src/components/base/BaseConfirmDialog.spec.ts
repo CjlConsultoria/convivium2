@@ -1,38 +1,45 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import BaseConfirmDialog from './BaseConfirmDialog.vue'
 
 describe('BaseConfirmDialog', () => {
+  afterEach(() => {
+    document.body.querySelectorAll('.fixed.inset-0').forEach((el) => el.remove())
+  })
   it('renderiza título e mensagem', () => {
-    const wrapper = mount(BaseConfirmDialog, {
+    mount(BaseConfirmDialog, {
       props: { open: true, title: 'Confirmar', message: 'Deseja excluir?' },
+      attachTo: document.body,
     })
-    expect(wrapper.text()).toContain('Confirmar')
-    expect(wrapper.text()).toContain('Deseja excluir?')
+    expect(document.body.textContent).toContain('Confirmar')
+    expect(document.body.textContent).toContain('Deseja excluir?')
   })
 
   it('emite confirm ao clicar em Confirmar', async () => {
     const wrapper = mount(BaseConfirmDialog, {
       props: { open: true, title: 'T', message: 'M' },
+      attachTo: document.body,
     })
-    const buttons = wrapper.findAll('button')
-    await buttons[buttons.length - 1].trigger('click')
+    const buttons = document.body.querySelectorAll('button')
+    buttons[buttons.length - 1]?.click()
     expect(wrapper.emitted('confirm')).toHaveLength(1)
   })
 
   it('emite cancel ao clicar em Cancelar', async () => {
     const wrapper = mount(BaseConfirmDialog, {
       props: { open: true, title: 'T', message: 'M' },
+      attachTo: document.body,
     })
-    const buttons = wrapper.findAll('button')
-    await buttons[0].trigger('click')
+    const buttons = document.body.querySelectorAll('button')
+    buttons[0]?.click()
     expect(wrapper.emitted('cancel')).toHaveLength(1)
   })
 
   it('aplica variant danger', () => {
-    const wrapper = mount(BaseConfirmDialog, {
+    mount(BaseConfirmDialog, {
       props: { open: true, title: 'T', message: 'M', variant: 'danger' },
+      attachTo: document.body,
     })
-    expect(wrapper.html()).toContain('danger')
+    expect(document.body.innerHTML).toContain('danger')
   })
 })

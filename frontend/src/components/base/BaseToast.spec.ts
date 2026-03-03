@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import BaseToast from './BaseToast.vue'
 
 describe('BaseToast', () => {
@@ -11,18 +12,22 @@ describe('BaseToast', () => {
     vi.useRealTimers()
   })
 
-  it('renderiza mensagem', () => {
+  it('renderiza mensagem', async () => {
     const wrapper = mount(BaseToast, { props: { message: 'Sucesso!', duration: 0 } })
+    await nextTick()
     expect(wrapper.text()).toContain('Sucesso!')
   })
 
-  it('aplica type success', () => {
+  it('aplica type success', async () => {
     const wrapper = mount(BaseToast, { props: { message: 'Ok', type: 'success', duration: 0 } })
-    expect(wrapper.classes()).toContain('bg-green-50')
+    await nextTick()
+    const toastDiv = wrapper.find('.bg-green-50')
+    expect(toastDiv.exists()).toBe(true)
   })
 
   it('emite close ao clicar no botão', async () => {
     const wrapper = mount(BaseToast, { props: { message: 'Msg', duration: 0 } })
+    await nextTick()
     await wrapper.find('button').trigger('click')
     expect(wrapper.emitted('close')).toHaveLength(1)
   })
