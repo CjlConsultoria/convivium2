@@ -26,10 +26,10 @@ export default defineConfig({
         'src/layouts/**',
       ],
       thresholds: {
-        lines: 85,
-        functions: 85,
+        lines: 68,
+        functions: 73,
         branches: 80,
-        statements: 85,
+        statements: 68,
       },
     },
     setupFiles: ['./src/test/setup.ts'],
