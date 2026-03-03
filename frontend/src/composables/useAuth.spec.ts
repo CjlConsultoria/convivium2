@@ -43,7 +43,7 @@ describe('useAuth', () => {
     expect(hasPermission('users.view')).toBe(true)
   })
 
-  it('isAuthenticated reflete o store', () => {
+  it('isAuthenticated reflete o store', async () => {
     const { useAuthStore } = await import('@/stores/auth.store')
     useAuthStore().accessToken = 'token'
 

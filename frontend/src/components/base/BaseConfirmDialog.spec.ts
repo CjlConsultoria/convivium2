@@ -40,6 +40,7 @@ describe('BaseConfirmDialog', () => {
       props: { open: true, title: 'T', message: 'M', variant: 'danger' },
       attachTo: document.body,
     })
-    expect(document.body.innerHTML).toContain('danger')
+    // variant danger aplica bg-red-600 no botão Confirmar
+    expect(document.body.innerHTML).toContain('bg-red-600')
   })
 })
