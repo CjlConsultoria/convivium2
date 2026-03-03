@@ -48,7 +48,9 @@
       "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" add .github/workflows/ci.yml backend/src/test/java/com/convivium/config/CorsConfigTest.java)",
       "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" commit -m \"$\\(cat <<''EOF''\nfix: CorsConfigTest compilation + pipeline with visible steps\n\n- Fix CorsConfigTest: use MockHttpServletRequest instead of String\n- Pipeline: 5 visual jobs \\(Backend → Frontend → Security → Quality → Deploy\\)\n- Backend and Frontend run in parallel, rest is sequential\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" add .github/workflows/auto-close-failed-pr.yml)",
-      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" commit -m \"$\\(cat <<''EOF''\nci: auto-close PRs when pipeline fails\n\nAutomatically closes pull requests and adds a comment when the\nCI/CD pipeline fails, keeping the PR list clean.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" commit -m \"$\\(cat <<''EOF''\nci: auto-close PRs when pipeline fails\n\nAutomatically closes pull requests and adds a comment when the\nCI/CD pipeline fails, keeping the PR list clean.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" add .github/workflows/ci.yml)",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" commit -m \"$\\(cat <<''EOF''\nci: add debug step to verify coverage report paths\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }
