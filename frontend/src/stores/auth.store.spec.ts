@@ -227,4 +227,85 @@ describe('auth.store', () => {
       expect(store.user).toEqual(expect.objectContaining({ email: 'a@b.com' }))
     })
   })
+
+  describe('completeGoogleRegistration', () => {
+    it('retorna needsApproval quando cadastro pendente', async () => {
+      vi.mocked(authApi.registerGoogle).mockResolvedValue({
+        data: { needsApproval: true, message: 'Aguardando aprovação do síndico.' },
+      } as any)
+
+      const store = useAuthStore()
+      const result = await store.completeGoogleRegistration({
+        idToken: 'token',
+        condominiumId: 1,
+        unitId: 1,
+      })
+
+      expect(result.needsApproval).toBe(true)
+      expect(result.message).toBe('Aguardando aprovação do síndico.')
+    })
+
+    it('faz login quando já tem vínculo ativo', async () => {
+      vi.mocked(authApi.registerGoogle).mockResolvedValue({
+        data: {
+          needsApproval: false,
+          login: {
+            accessToken: 'at',
+            refreshToken: 'rt',
+            user: { id: 1, email: 'a@b.com', condominiumRoles: [] },
+          },
+        },
+      } as any)
+
+      const store = useAuthStore()
+      const result = await store.completeGoogleRegistration({
+        idToken: 'token',
+        condominiumId: 1,
+        unitId: 1,
+      })
+
+      expect(result.needsApproval).toBe(false)
+      expect(store.accessToken).toBe('at')
+      expect(store.refreshToken).toBe('rt')
+    })
+  })
+
+  describe('isPlatformAdmin', () => {
+    it('retorna true quando user é platform admin', () => {
+      const store = useAuthStore()
+      store.user = { isPlatformAdmin: true } as any
+      expect(store.isPlatformAdmin).toBe(true)
+    })
+
+    it('retorna false quando user não é platform admin', () => {
+      const store = useAuthStore()
+      store.user = { isPlatformAdmin: false } as any
+      expect(store.isPlatformAdmin).toBe(false)
+    })
+  })
+
+  describe('currentRoles', () => {
+    it('retorna roles do condomínio atual', async () => {
+      const { useTenantStore } = await import('./tenant.store')
+      const tenantStore = useTenantStore()
+      tenantStore.currentCondominiumId = 1
+
+      const store = useAuthStore()
+      store.user = {
+        condominiumRoles: [
+          { condominiumId: 1, role: 'SINDICO', status: 'ACTIVE' },
+          { condominiumId: 2, role: 'MORADOR', status: 'ACTIVE' },
+        ],
+      } as any
+
+      expect(store.currentRoles).toHaveLength(1)
+      expect(store.currentRoles[0].role).toBe('SINDICO')
+    })
+
+    it('retorna vazio quando não há condomínio selecionado', () => {
+      const store = useAuthStore()
+      store.user = { condominiumRoles: [{ condominiumId: 1, role: 'SINDICO', status: 'ACTIVE' }] } as any
+      expect(store.currentRoles).toHaveLength(0)
+    })
+  })
 })

@@ -50,7 +50,14 @@
       "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" add .github/workflows/auto-close-failed-pr.yml)",
       "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" commit -m \"$\\(cat <<''EOF''\nci: auto-close PRs when pipeline fails\n\nAutomatically closes pull requests and adds a comment when the\nCI/CD pipeline fails, keeping the PR list clean.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" add .github/workflows/ci.yml)",
-      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" commit -m \"$\\(cat <<''EOF''\nci: add debug step to verify coverage report paths\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" commit -m \"$\\(cat <<''EOF''\nci: add debug step to verify coverage report paths\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" add sonar-project.properties)",
+      "Bash(git -C \"C:\\\\GIT_CJL\\\\convivium2\" commit -m \"$\\(cat <<''EOF''\nci: add coverage exclusions for untestable backend code\n\nExclude integration layer, annotations, properties classes and base\nentities from coverage analysis - these are hard to unit test and\nshould not block the Quality Gate.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "WebFetch(domain:sonarcloud.io)",
+      "Bash(cmd.exe /c \"cd /d C:\\\\GIT_CJL\\\\convivium2\\\\backend && mvn test --batch-mode 2>&1\")",
+      "Bash(cmd.exe /c \"cd C:\\\\GIT_CJL\\\\convivium2\\\\backend && mvn test --batch-mode\")",
+      "Bash(powershell.exe -Command \"cd C:\\\\GIT_CJL\\\\convivium2\\\\backend; mvn test --batch-mode 2>&1 | Select-Object -Last 120\")",
+      "Bash(powershell.exe -Command:*)"
     ]
   }
 }

@@ -105,5 +105,37 @@ describe('formatters', () => {
     it('retorna anos', () => {
       expect(timeAgo('2024-03-02T12:00:00Z')).toBe('ha 1 ano')
     })
+
+    it('retorna 1 minuto', () => {
+      expect(timeAgo('2025-03-02T11:59:00Z')).toBe('ha 1 minuto')
+    })
+
+    it('retorna 1 hora', () => {
+      expect(timeAgo('2025-03-02T11:00:00Z')).toBe('ha 1 hora')
+    })
+
+    it('retorna 1 dia', () => {
+      expect(timeAgo('2025-03-01T12:00:00Z')).toBe('ha 1 dia')
+    })
+
+    it('retorna múltiplas semanas', () => {
+      expect(timeAgo('2025-02-16T12:00:00Z')).toBe('ha 2 semanas')
+    })
+
+    it('retorna múltiplos anos', () => {
+      expect(timeAgo('2023-03-02T12:00:00Z')).toBe('ha 2 anos')
+    })
+  })
+
+  describe('formatCPF com caracteres não numéricos', () => {
+    it('remove caracteres e formata', () => {
+      expect(formatCPF('529.982.247-25')).toBe('529.982.247-25')
+    })
+  })
+
+  describe('formatPhone com dígitos', () => {
+    it('formata com parênteses e hífen', () => {
+      expect(formatPhone('(11) 99999-9999')).toBe('(11) 99999-9999')
+    })
   })
 })
