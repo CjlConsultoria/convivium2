@@ -14,12 +14,13 @@ import com.convivium.module.user.repository.UserCondominiumRoleRepository;
 import com.convivium.module.user.repository.UserRepository;
 import com.convivium.security.jwt.JwtProperties;
 import com.convivium.security.jwt.JwtTokenProvider;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.quality.Strictness;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Instant;
@@ -33,6 +34,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class AuthServiceTest {
 
     @Mock
@@ -68,12 +70,6 @@ class AuthServiceTest {
     @InjectMocks
     private AuthService authService;
 
-    @BeforeEach
-    void setUp() {
-        when(jwtProperties.getAccessTokenExpiration()).thenReturn(900_000L);
-        when(jwtProperties.getRefreshTokenExpiration()).thenReturn(604_800_000L);
-    }
-
     @Test
     void login_throwsWhenUserNotFound() {
         when(userRepository.findByEmail("a@b.com")).thenReturn(Optional.empty());
@@ -98,6 +94,8 @@ class AuthServiceTest {
 
     @Test
     void login_returnsTokensWhenValid() {
+        when(jwtProperties.getAccessTokenExpiration()).thenReturn(900_000L);
+        when(jwtProperties.getRefreshTokenExpiration()).thenReturn(604_800_000L);
         User user = User.builder()
                 .id(1L)
                 .uuid(java.util.UUID.randomUUID())
@@ -130,7 +128,7 @@ class AuthServiceTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () ->
                 authService.login(new LoginRequest("a@b.com", "senha")));
-        assertEquals("USE_GOOGLE_LOGIN", ex.getCode());
+        assertEquals("USE_GOOGLE_LOGIN", ex.getErrorCode());
     }
 
     @Test
@@ -141,11 +139,13 @@ class AuthServiceTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () ->
                 authService.login(new LoginRequest("a@b.com", "senha")));
-        assertEquals("ACCOUNT_DISABLED", ex.getCode());
+        assertEquals("ACCOUNT_DISABLED", ex.getErrorCode());
     }
 
     @Test
     void refreshToken_returnsNewTokens() {
+        when(jwtProperties.getAccessTokenExpiration()).thenReturn(900_000L);
+        when(jwtProperties.getRefreshTokenExpiration()).thenReturn(604_800_000L);
         User user = User.builder().id(1L).uuid(UUID.randomUUID()).email("a@b.com").isActive(true).condominiumRoles(List.of()).build();
         RefreshToken storedToken = RefreshToken.builder().user(user).token("oldRt").expiresAt(Instant.now().plusSeconds(3600)).revoked(false).build();
         when(refreshTokenRepository.findByToken("oldRt")).thenReturn(Optional.of(storedToken));
@@ -183,8 +183,9 @@ class AuthServiceTest {
     @Test
     void logoutByUuid_deletesTokens() {
         User user = User.builder().id(1L).build();
-        when(userRepository.findByUuid(any())).thenReturn(Optional.of(user));
-        authService.logoutByUuid("uuid");
+        UUID userUuid = UUID.randomUUID();
+        when(userRepository.findByUuid(userUuid)).thenReturn(Optional.of(user));
+        authService.logoutByUuid(userUuid.toString());
         verify(refreshTokenRepository).deleteByUserId(1L);
     }
 
@@ -206,11 +207,12 @@ class AuthServiceTest {
 
     @Test
     void updateMyProfile_updatesUser() {
-        User user = User.builder().id(1L).uuid(UUID.randomUUID()).email("a@b.com").name("Old").condominiumRoles(List.of()).build();
-        when(userRepository.findByUuid(any())).thenReturn(Optional.of(user));
+        UUID userUuid = UUID.randomUUID();
+        User user = User.builder().id(1L).uuid(userUuid).email("a@b.com").name("Old").condominiumRoles(List.of()).build();
+        when(userRepository.findByUuid(userUuid)).thenReturn(Optional.of(user));
         when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        UserInfoResponse response = authService.updateMyProfile("uuid", new UpdateMyProfileRequest("New Name", null));
+        UserInfoResponse response = authService.updateMyProfile(userUuid.toString(), new UpdateMyProfileRequest("New Name", null));
         assertEquals("New Name", response.name());
     }
 
@@ -298,7 +300,7 @@ class AuthServiceTest {
         when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(userCondominiumRoleRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        authService.register(new RegisterRequest("a@b.com", "senha", "User", "12345678901", "11999999999", 1L, 1L));
+        authService.register(new RegisterRequest("User", "a@b.com", "senha", "12345678901", "11999999999", 1L, 1L));
 
         verify(userRepository).save(any(User.class));
         verify(userCondominiumRoleRepository).save(any(UserCondominiumRole.class));
@@ -308,6 +310,6 @@ class AuthServiceTest {
     void register_throwsWhenEmailExists() {
         when(userRepository.existsByEmail("a@b.com")).thenReturn(true);
         assertThrows(BusinessException.class, () ->
-                authService.register(new RegisterRequest("a@b.com", "senha", "User", null, null, 1L, 1L)));
+                authService.register(new RegisterRequest("User", "a@b.com", "senha", null, null, 1L, 1L)));
     }
 }
