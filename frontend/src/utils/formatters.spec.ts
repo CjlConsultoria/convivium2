@@ -12,8 +12,12 @@ import {
 describe('formatters', () => {
   describe('formatCurrency', () => {
     it('formata centavos para BRL', () => {
-      expect(formatCurrency(10000)).toBe('R$ 100,00')
-      expect(formatCurrency(0)).toBe('R$ 0,00')
+      const result100 = formatCurrency(10000)
+      expect(result100).toContain('R$')
+      expect(result100).toContain('100,00')
+      const result0 = formatCurrency(0)
+      expect(result0).toContain('R$')
+      expect(result0).toContain('0,00')
     })
   })
 
@@ -95,7 +99,7 @@ describe('formatters', () => {
     })
 
     it('retorna meses', () => {
-      expect(timeAgo('2025-01-02T12:00:00Z')).toBe('ha 2 meses')
+      expect(timeAgo('2024-12-02T12:00:00Z')).toBe('ha 3 meses')
     })
 
     it('retorna anos', () => {

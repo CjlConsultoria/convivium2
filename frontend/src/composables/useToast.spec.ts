@@ -4,6 +4,9 @@ import { useToast } from './useToast'
 describe('useToast', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+    // Limpa estado global dos toasts entre testes
+    const { toasts } = useToast()
+    toasts.value = []
   })
 
   afterEach(() => {

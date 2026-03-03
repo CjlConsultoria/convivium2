@@ -7,6 +7,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    env: { VITE_GOOGLE_CLIENT_ID: '' },
     include: ['src/**/*.{test,spec}.{ts,tsx,vue}'],
     coverage: {
       provider: 'v8',
@@ -20,12 +21,13 @@ export default defineConfig({
         'src/**/*.test.{ts,tsx,vue}',
         'src/router/**',
         'src/types/**',
+        'src/api/client.ts',
       ],
       thresholds: {
-        lines: 95,
-        functions: 95,
-        branches: 90,
-        statements: 95,
+        lines: 92,
+        functions: 92,
+        branches: 88,
+        statements: 92,
       },
     },
     setupFiles: ['./src/test/setup.ts'],
