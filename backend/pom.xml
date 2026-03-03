@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version>
+        <version>3.3.12</version>
         <relativePath/>
     </parent>
 
@@ -23,6 +23,11 @@
         <jjwt.version>0.12.6</jjwt.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <springdoc.version>2.6.0</springdoc.version>
+        <!-- Overrides para corrigir vulnerabilidades (Trivy) -->
+        <postgresql.version>42.7.7</postgresql.version>
+        <tomcat.version>10.1.45</tomcat.version>
+        <netty.version>4.1.124.Final</netty.version>
+        <jackson-bom.version>2.18.6</jackson-bom.version>
     </properties>
 
     <dependencies>
