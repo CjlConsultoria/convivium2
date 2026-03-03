@@ -1,0 +1,15 @@
+# Perfil de teste - banco em memória ou mocks
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+app:
+  jwt:
+    secret: "test-secret-with-at-least-32-characters-for-hmac-sha256"
+    access-token-expiration: 900000
+    refresh-token-expiration: 604800000
+  cors:
+    allowed-origins:
+      - http://localhost:5173
