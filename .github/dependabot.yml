@@ -1,58 +1,38 @@
 version: 2
 
 updates:
-  # ─── Backend: Maven (Java) ───────────────────────────────────────
   - package-ecosystem: maven
     directory: /backend
     schedule:
-      interval: weekly
-      day: monday
-    open-pull-requests-limit: 5
-    labels:
-      - dependencies
-      - backend
+      interval: monthly
+    open-pull-requests-limit: 3
+    labels: [dependencies]
     commit-message:
-      prefix: "deps(backend):"
+      prefix: "deps:"
     groups:
-      all-backend-deps:
-        patterns:
-          - "*"
+      all-dependencies:
+        patterns: ["*"]
 
-  # ─── Frontend: npm (Vue/TypeScript) ──────────────────────────────
   - package-ecosystem: npm
     directory: /frontend
     schedule:
-      interval: weekly
-      day: monday
-    open-pull-requests-limit: 5
-    labels:
-      - dependencies
-      - frontend
+      interval: monthly
+    open-pull-requests-limit: 3
+    labels: [dependencies]
     commit-message:
-      prefix: "deps(frontend):"
+      prefix: "deps:"
     groups:
-      production-deps:
-        dependency-type: production
-        patterns:
-          - "*"
-      dev-deps:
-        dependency-type: development
-        patterns:
-          - "*"
+      all-dependencies:
+        patterns: ["*"]
 
-  # ─── GitHub Actions ──────────────────────────────────────────────
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
     open-pull-requests-limit: 3
-    labels:
-      - dependencies
-      - ci
+    labels: [dependencies]
     commit-message:
-      prefix: "deps(ci):"
+      prefix: "deps:"
     groups:
-      all-actions:
-        patterns:
-          - "*"
+      all-dependencies:
+        patterns: ["*"]
