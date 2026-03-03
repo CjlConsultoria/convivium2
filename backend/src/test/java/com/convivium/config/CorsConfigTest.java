@@ -1,6 +1,8 @@
 package com.convivium.config;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -21,7 +23,9 @@ class CorsConfigTest {
         CorsConfig config = new CorsConfig();
         CorsConfigurationSource source = config.corsConfigurationSource(props);
 
-        CorsConfiguration corsConfig = source.getCorsConfiguration("/api/v1/auth/login");
+        HttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/auth/login");
+        CorsConfiguration corsConfig = source.getCorsConfiguration(request);
+
         assertNotNull(corsConfig);
         assertTrue(corsConfig.getAllowedOrigins().contains("http://localhost:5173"));
         assertTrue(corsConfig.getAllowedOrigins().contains("https://convivium2.onrender.com"));
