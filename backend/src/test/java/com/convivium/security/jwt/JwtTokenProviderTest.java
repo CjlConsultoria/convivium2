@@ -69,4 +69,79 @@ class JwtTokenProviderTest {
         );
         assertEquals("user-uuid-123", jwtTokenProvider.getSubject(token));
     }
+
+    @Test
+    void getEmailFromToken_returnsEmail() {
+        String token = jwtTokenProvider.generateAccessToken(
+                "user-uuid",
+                "admin@condominio.com",
+                null,
+                List.of(),
+                List.of()
+        );
+        assertEquals("admin@condominio.com", jwtTokenProvider.getEmail(token));
+    }
+
+    @Test
+    void getCondominiumIdFromToken_returnsIdWhenPresent() {
+        String token = jwtTokenProvider.generateAccessToken(
+                "user-uuid",
+                "user@example.com",
+                42L,
+                List.of(),
+                List.of()
+        );
+        assertEquals(42L, jwtTokenProvider.getCondominiumId(token));
+    }
+
+    @Test
+    void getCondominiumIdFromToken_returnsNullWhenAbsent() {
+        String token = jwtTokenProvider.generateAccessToken(
+                "user-uuid",
+                "user@example.com",
+                null,
+                List.of(),
+                List.of()
+        );
+        assertNull(jwtTokenProvider.getCondominiumId(token));
+    }
+
+    @Test
+    void getRolesFromToken_returnsRoles() {
+        String token = jwtTokenProvider.generateAccessToken(
+                "user-uuid",
+                "user@example.com",
+                null,
+                List.of("SINDICO", "MORADOR"),
+                List.of()
+        );
+        assertEquals(List.of("SINDICO", "MORADOR"), jwtTokenProvider.getRoles(token));
+    }
+
+    @Test
+    void getPermissionsFromToken_returnsPermissions() {
+        String token = jwtTokenProvider.generateAccessToken(
+                "user-uuid",
+                "user@example.com",
+                null,
+                List.of(),
+                List.of("complaint:read", "complaint:write")
+        );
+        assertEquals(List.of("complaint:read", "complaint:write"), jwtTokenProvider.getPermissions(token));
+    }
+
+    @Test
+    void validateToken_returnsFalseForEmptyToken() {
+        assertFalse(jwtTokenProvider.validateToken(""));
+    }
+
+    @Test
+    void init_throwsWhenSecretTooShort() {
+        JwtProperties props = new JwtProperties();
+        props.setSecret("short");
+        props.setAccessTokenExpiration(900_000L);
+        props.setRefreshTokenExpiration(604_800_000L);
+        JwtTokenProvider provider = new JwtTokenProvider(props);
+        assertThrows(IllegalStateException.class, provider::init);
+    }
 }

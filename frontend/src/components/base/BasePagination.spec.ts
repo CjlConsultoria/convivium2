@@ -36,4 +36,19 @@ describe('BasePagination', () => {
     })
     expect(wrapper.findAll('button')[0].attributes('disabled')).toBeDefined()
   })
+
+  it('desabilita Próximo na última página', () => {
+    const wrapper = mount(BasePagination, {
+      props: { page: 1, totalPages: 2, totalElements: 20, size: 10 },
+    })
+    const buttons = wrapper.findAll('button')
+    expect(buttons[1].attributes('disabled')).toBeDefined()
+  })
+
+  it('exibe endItem correto quando totalElements menor que size', () => {
+    const wrapper = mount(BasePagination, {
+      props: { page: 0, totalPages: 1, totalElements: 7, size: 10 },
+    })
+    expect(wrapper.text()).toContain('7')
+  })
 })

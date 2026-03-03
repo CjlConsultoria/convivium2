@@ -37,5 +37,19 @@ describe('ui.store', () => {
       store.setTheme('light')
       expect(store.theme).toBe('light')
     })
+
+    it('adiciona classe dark no document quando tema dark', () => {
+      const store = useUiStore()
+      document.documentElement.classList.remove('dark')
+      store.setTheme('dark')
+      expect(document.documentElement.classList.contains('dark')).toBe(true)
+    })
+
+    it('remove classe dark do document quando tema light', () => {
+      const store = useUiStore()
+      document.documentElement.classList.add('dark')
+      store.setTheme('light')
+      expect(document.documentElement.classList.contains('dark')).toBe(false)
+    })
   })
 })

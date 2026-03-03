@@ -45,4 +45,18 @@ describe('useToast', () => {
     expect(toasts.value).toHaveLength(1)
     expect(toasts.value[0].message).toBe('B')
   })
+
+  it('toast com duration 0 não remove automaticamente', () => {
+    const { toasts, showToast } = useToast()
+    showToast('Persistente', 'info', 0)
+    expect(toasts.value).toHaveLength(1)
+    vi.advanceTimersByTime(10000)
+    expect(toasts.value).toHaveLength(1)
+  })
+
+  it('success/error/warning/info aceitam duration opcional', () => {
+    const { toasts, success } = useToast()
+    success('Ok', 500)
+    expect(toasts.value[0].duration).toBe(500)
+  })
 })
