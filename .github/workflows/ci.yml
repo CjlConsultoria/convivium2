@@ -122,10 +122,18 @@ jobs:
           name: frontend-coverage
           path: frontend/coverage/
 
+      - name: Verify coverage reports
+        run: |
+          echo "=== Backend JaCoCo ==="
+          ls -la backend/target/site/jacoco/ 2>/dev/null || echo "JaCoCo report NOT found"
+          echo "=== Frontend lcov ==="
+          ls -la frontend/coverage/lcov.info 2>/dev/null || echo "lcov report NOT found"
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Quality Gate Check
         uses: SonarSource/sonarqube-quality-gate-action@v1
