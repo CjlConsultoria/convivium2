@@ -8,7 +8,6 @@ import com.convivium.module.condominium.entity.Condominium;
 import com.convivium.module.condominium.entity.Plan;
 import com.convivium.module.condominium.repository.CondominiumRepository;
 import com.convivium.module.condominium.repository.PlanRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,7 +40,6 @@ class StripeServiceTest {
     @Test
     void createCheckoutSession_stripeNotEnabled_throws() {
         when(stripeProperties.isEnabled()).thenReturn(false);
-        when(stripeProperties.getSecretKey()).thenReturn("");
 
         assertThatThrownBy(() -> stripeService.createCheckoutSession(1L, 1L, true))
                 .isInstanceOf(BusinessException.class)
