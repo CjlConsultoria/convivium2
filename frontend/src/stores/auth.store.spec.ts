@@ -106,6 +106,25 @@ describe('auth.store', () => {
       } as any
       expect(store.hasPermission('users.view')).toBe(true)
     })
+
+    it('retorna false quando role não tem a permissão', async () => {
+      const { useTenantStore } = await import('./tenant.store')
+      const tenantStore = useTenantStore()
+      tenantStore.currentCondominiumId = 1
+
+      const store = useAuthStore()
+      store.user = {
+        isPlatformAdmin: false,
+        condominiumRoles: [{ condominiumId: 1, role: 'MORADOR', status: 'ACTIVE' }],
+      } as any
+      expect(store.hasPermission('users.delete')).toBe(false)
+    })
+
+    it('retorna false quando não há user', () => {
+      const store = useAuthStore()
+      store.user = null
+      expect(store.hasPermission('users.view')).toBe(false)
+    })
   })
 
   describe('loginWithGoogle', () => {

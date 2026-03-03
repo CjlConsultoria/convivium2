@@ -1,13 +1,14 @@
 package com.convivium.common.exception;
 
 import com.convivium.common.dto.ApiResponse;
+import com.convivium.integration.google.GoogleIdTokenVerifier.InvalidGoogleTokenException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,5 +58,26 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("INTERNAL_ERROR", response.getBody().getErrorCode());
+    }
+
+    @Test
+    void handleInvalidGoogleToken_returns401() {
+        InvalidGoogleTokenException ex = new InvalidGoogleTokenException("Token invalido");
+        ResponseEntity<ApiResponse<Void>> response = handler.handleInvalidGoogleToken(ex);
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("INVALID_GOOGLE_TOKEN", response.getBody().getErrorCode());
+    }
+
+    @Test
+    void handleValidation_returns400() {
+        BeanPropertyBindingResult errors = new BeanPropertyBindingResult(new Object(), "obj");
+        errors.addError(new FieldError("obj", "email", "Email invalido"));
+        MethodArgumentNotValidException ex = new MethodArgumentNotValidException(null, errors);
+        ResponseEntity<ApiResponse<Void>> response = handler.handleValidation(ex);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertNotNull(response.getBody().getErrors());
+        assertEquals(1, response.getBody().getErrors().size());
     }
 }

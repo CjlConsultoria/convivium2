@@ -30,6 +30,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -299,6 +301,80 @@ class UserServiceTest {
         userService.rejectUser(1L, 1L);
 
         verify(userCondominiumRoleRepository).delete(ucr);
+    }
+
+    @Test
+    void rejectUser_throwsWhenNotPending() {
+        UserCondominiumRole ucr = UserCondominiumRole.builder().status("ACTIVE").build();
+        when(userCondominiumRoleRepository.findByUserIdAndCondominiumId(1L, 1L))
+                .thenReturn(Optional.of(ucr));
+        assertThrows(BusinessException.class, () -> userService.rejectUser(1L, 1L));
+    }
+
+    @Test
+    void createUser_withUnit() {
+        Long condoId = 1L;
+        Condominium condo = Condominium.builder().id(condoId).name("Condo").build();
+        Unit unit = Unit.builder().id(10L).identifier("101").condominiumId(condoId).build();
+        User savedUser = createUser(1L);
+        UserCondominiumRole savedUcr = UserCondominiumRole.builder()
+                .user(savedUser)
+                .condominium(condo)
+                .role(Role.MORADOR)
+                .unit(unit)
+                .status("ACTIVE")
+                .build();
+        when(userRepository.existsByEmail("user@test.com")).thenReturn(false);
+        when(condominiumRepository.findById(condoId)).thenReturn(Optional.of(condo));
+        when(unitRepository.findByCondominiumIdAndId(condoId, 10L)).thenReturn(Optional.of(unit));
+        when(passwordEncoder.encode("senha123")).thenReturn("hashed");
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userCondominiumRoleRepository.save(any(UserCondominiumRole.class))).thenAnswer(i -> i.getArgument(0));
+        UserCreateRequest request = new UserCreateRequest("User", "user@test.com", "senha123", null, null, "MORADOR", 10L);
+        UserResponse response = userService.createUser(condoId, request);
+        assertNotNull(response);
+        verify(userCondominiumRoleRepository).save(argThat(u -> u.getUnit() != null));
+    }
+
+    @Test
+    void updateUser_withUnitChange() {
+        User user = createUser(1L);
+        Condominium condo = Condominium.builder().id(1L).build();
+        Unit oldUnit = Unit.builder().id(10L).identifier("101").build();
+        Unit newUnit = Unit.builder().id(20L).identifier("201").condominiumId(1L).build();
+        UserCondominiumRole ucr = UserCondominiumRole.builder()
+                .user(user)
+                .condominium(condo)
+                .role(Role.MORADOR)
+                .unit(oldUnit)
+                .status("ACTIVE")
+                .build();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userCondominiumRoleRepository.findByUserIdAndCondominiumId(1L, 1L)).thenReturn(Optional.of(ucr));
+        when(unitRepository.findByCondominiumIdAndId(1L, 20L)).thenReturn(Optional.of(newUnit));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userCondominiumRoleRepository.save(any(UserCondominiumRole.class))).thenAnswer(i -> i.getArgument(0));
+        UserUpdateRequest request = new UserUpdateRequest(null, null, null, null, 20L);
+        userService.updateUser(1L, 1L, request);
+        verify(userCondominiumRoleRepository).save(argThat(u -> u.getUnit() != null && u.getUnit().getId() == 20L));
+    }
+
+    @Test
+    void approveUser_withUnit() {
+        User user = createUser(1L);
+        Condominium condo = Condominium.builder().id(1L).build();
+        Unit unit = Unit.builder().id(10L).identifier("101").condominiumId(1L).build();
+        UserCondominiumRole ucr = UserCondominiumRole.builder()
+                .user(user)
+                .condominium(condo)
+                .role(Role.MORADOR)
+                .status("PENDING_APPROVAL")
+                .build();
+        when(userCondominiumRoleRepository.findByUserIdAndCondominiumId(1L, 1L)).thenReturn(Optional.of(ucr));
+        when(unitRepository.findByCondominiumIdAndId(1L, 10L)).thenReturn(Optional.of(unit));
+        when(userCondominiumRoleRepository.save(any(UserCondominiumRole.class))).thenAnswer(i -> i.getArgument(0));
+        userService.approveUser(1L, 1L, 2L, 10L);
+        verify(userCondominiumRoleRepository).save(argThat(u -> u.getUnit() != null));
     }
 
     private User createUser(Long id) {

@@ -28,6 +28,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -143,6 +144,98 @@ class ComplaintServiceTest {
         Page<ComplaintListResponse> result = complaintService.getMyComplaints(1L, 1L, null, Pageable.unpaged());
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
+    }
+
+    @Test
+    void listComplaints_withStatus() {
+        Complaint c = createComplaint(1L);
+        when(complaintRepository.findByCondominiumIdAndStatus(eq(1L), eq(ComplaintStatus.OPEN), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(c)));
+        Page<ComplaintListResponse> result = complaintService.listComplaints(1L, ComplaintStatus.OPEN, Pageable.unpaged());
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+    }
+
+    @Test
+    void getComplaintFiltered_throwsWhenMoradorOnlyAndNotOwner() {
+        Complaint c = createComplaint(1L);
+        c.setComplainant(createUser(99L));
+        when(complaintRepository.findByIdAndCondominiumId(1L, 1L)).thenReturn(Optional.of(c));
+        assertThrows(org.springframework.security.access.AccessDeniedException.class, () ->
+                complaintService.getComplaintFiltered(1L, 1L, false, 1L, true));
+    }
+
+    @Test
+    void getComplaintFiltered_successForOwner() {
+        Complaint c = createComplaint(1L);
+        c.setComplainant(createUser(1L));
+        when(complaintRepository.findByIdAndCondominiumId(1L, 1L)).thenReturn(Optional.of(c));
+        when(complaintResponseRepository.findByComplaintIdOrderByCreatedAtAsc(1L)).thenReturn(List.of());
+        var r = complaintService.getComplaintFiltered(1L, 1L, false, 1L, true);
+        assertNotNull(r);
+        assertEquals("Reclamacao", r.title());
+    }
+
+    @Test
+    void createComplaint_withUnit() {
+        User user = createUser(1L);
+        com.convivium.module.condominium.entity.Unit unit = new com.convivium.module.condominium.entity.Unit();
+        unit.setId(10L);
+        unit.setIdentifier("101");
+        Complaint saved = createComplaint(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(unitRepository.findById(10L)).thenReturn(Optional.of(unit));
+        when(complaintRepository.save(any())).thenReturn(saved);
+        ComplaintCreateRequest req = new ComplaintCreateRequest("NOISE", "Titulo", "Desc", false, 10L, "HIGH");
+        ComplaintListResponse r = complaintService.createComplaint(1L, 1L, req);
+        assertNotNull(r);
+        verify(complaintRepository).save(argThat(x -> x.getUnit() != null));
+    }
+
+    @Test
+    void addResponse_setsInReviewWhenOpen() {
+        Complaint c = createComplaint(1L);
+        c.setStatus(ComplaintStatus.OPEN);
+        User responder = createUser(1L);
+        ComplaintResponse cr = new ComplaintResponse();
+        cr.setId(1L);
+        cr.setMessage("Resposta");
+        cr.setInternal(true);
+        cr.setResponder(responder);
+        cr.setComplaint(c);
+        when(complaintRepository.findByIdAndCondominiumId(1L, 1L)).thenReturn(Optional.of(c));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(responder));
+        when(complaintResponseRepository.save(any())).thenReturn(cr);
+        when(complaintRepository.save(any())).thenReturn(c);
+        complaintService.addResponse(1L, 1L, 1L, new ComplaintResponseCreateRequest("Resposta", true));
+        verify(complaintRepository).save(argThat(x -> ComplaintStatus.IN_REVIEW == x.getStatus()));
+    }
+
+    @Test
+    void updateStatus_setsResolvedAtWhenResolved() {
+        Complaint c = createComplaint(1L);
+        c.setStatus(ComplaintStatus.IN_REVIEW);
+        when(complaintRepository.findByIdAndCondominiumId(1L, 1L)).thenReturn(Optional.of(c));
+        when(complaintRepository.save(any())).thenReturn(c);
+        complaintService.updateStatus(1L, 1L, "RESOLVED");
+        verify(complaintRepository).save(argThat(x -> x.getResolvedAt() != null));
+    }
+
+    @Test
+    void updateStatus_setsClosedAtWhenClosed() {
+        Complaint c = createComplaint(1L);
+        c.setStatus(ComplaintStatus.RESOLVED);
+        when(complaintRepository.findByIdAndCondominiumId(1L, 1L)).thenReturn(Optional.of(c));
+        when(complaintRepository.save(any())).thenReturn(c);
+        complaintService.updateStatus(1L, 1L, "CLOSED");
+        verify(complaintRepository).save(argThat(x -> x.getClosedAt() != null));
+    }
+
+    @Test
+    void updateStatus_throwsWhenInvalidStatus() {
+        Complaint c = createComplaint(1L);
+        when(complaintRepository.findByIdAndCondominiumId(1L, 1L)).thenReturn(Optional.of(c));
+        assertThrows(BusinessException.class, () -> complaintService.updateStatus(1L, 1L, "INVALID_STATUS"));
     }
 
     private Complaint createComplaint(Long id) {

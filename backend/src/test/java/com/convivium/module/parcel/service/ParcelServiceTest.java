@@ -142,6 +142,86 @@ class ParcelServiceTest {
         assertEquals(1, result.getContent().size());
     }
 
+    @Test
+    void getMyParcels_withStatus() {
+        Parcel p = createParcel(1L);
+        when(parcelRepository.findByRecipientIdAndStatus(eq(1L), eq(ParcelStatus.RECEIVED), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(p)));
+        Page<ParcelListResponse> result = parcelService.getMyParcels(1L, 1L, ParcelStatus.RECEIVED, Pageable.unpaged());
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+    }
+
+    @Test
+    void generateCodes_returnsNewCode() {
+        Parcel p = createParcel(1L);
+        p.setResidentCode("old");
+        when(parcelRepository.findByIdAndCondominiumId(1L, 1L)).thenReturn(Optional.of(p));
+        when(parcelRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        var result = parcelService.generateCodes(1L, 1L);
+        assertNotNull(result);
+        assertTrue(result.containsKey("residentCode"));
+        assertEquals(6, result.get("residentCode").length());
+    }
+
+    @Test
+    void verifyPickup_success() {
+        Parcel p = createParcel(1L);
+        p.setResidentCode("123456");
+        p.setRecipient(createUser(2L));
+        User doorman = createUser(1L);
+        when(parcelRepository.findByIdAndCondominiumId(1L, 1L)).thenReturn(Optional.of(p));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(doorman));
+        when(parcelVerificationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(parcelRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        parcelService.verifyPickup(1L, 1L, new ParcelVerifyRequest("123456", "CODE"), 1L);
+        verify(parcelRepository).save(argThat(x -> ParcelStatus.DELIVERED == x.getStatus()));
+    }
+
+    @Test
+    void verifyPickup_throwsWhenNoRecipient() {
+        Parcel p = createParcel(1L);
+        p.setResidentCode("123456");
+        p.setRecipient(null);
+        when(parcelRepository.findByIdAndCondominiumId(1L, 1L)).thenReturn(Optional.of(p));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(createUser(1L)));
+        assertThrows(BusinessException.class, () ->
+                parcelService.verifyPickup(1L, 1L, new ParcelVerifyRequest("123456", "CODE"), 1L));
+    }
+
+    @Test
+    void getParcel_successForRecipient() {
+        Parcel p = createParcel(1L);
+        User recipient = createUser(2L);
+        p.setRecipient(recipient);
+        p.setResidentCode("123456");
+        when(parcelRepository.findByIdAndCondominiumId(1L, 1L)).thenReturn(Optional.of(p));
+        UserPrincipal principal = createPrincipal(2L, "ROLE_MORADOR");
+        var r = parcelService.getParcel(1L, 1L, principal);
+        assertNotNull(r);
+        assertNotNull(r.residentCode());
+    }
+
+    @Test
+    void createParcel_withRecipient() {
+        User receivedBy = createUser(1L);
+        User recipient = createUser(2L);
+        recipient.setPhone("11999999999");
+        Unit unit = Unit.builder().id(10L).identifier("101").condominiumId(1L).build();
+        Parcel saved = createParcel(1L);
+        saved.setUnit(unit);
+        saved.setReceivedBy(receivedBy);
+        saved.setRecipient(recipient);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(receivedBy));
+        when(userRepository.findById(2L)).thenReturn(Optional.of(recipient));
+        when(unitRepository.findById(10L)).thenReturn(Optional.of(unit));
+        when(parcelRepository.save(any())).thenReturn(saved);
+        ParcelCreateRequest req = new ParcelCreateRequest(10L, 2L, "Correios", null, "Pacote");
+        ParcelListResponse r = parcelService.createParcel(1L, 1L, req);
+        assertNotNull(r);
+        verify(whatsAppService).sendEncomendaNotification(eq("11999999999"), any(), any());
+    }
+
     private Parcel createParcel(Long id) {
         Parcel p = new Parcel();
         p.setId(id);
@@ -158,6 +238,7 @@ class ParcelServiceTest {
         u.setId(id);
         u.setName("User " + id);
         u.setEmail("user" + id + "@test.com");
+        u.setPhone(null);
         return u;
     }
 

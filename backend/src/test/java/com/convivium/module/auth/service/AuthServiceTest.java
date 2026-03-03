@@ -312,4 +312,64 @@ class AuthServiceTest {
         assertThrows(BusinessException.class, () ->
                 authService.register(new RegisterRequest("User", "a@b.com", "senha", null, null, 1L, 1L)));
     }
+
+    @Test
+    void register_throwsWhenCpfExists() {
+        when(userRepository.existsByEmail("a@b.com")).thenReturn(false);
+        when(userRepository.existsByCpf("12345678901")).thenReturn(true);
+        Condominium condo = new Condominium();
+        condo.setId(1L);
+        Unit unit = new Unit();
+        unit.setId(1L);
+        unit.setCondominiumId(1L);
+        when(condominiumRepository.findById(1L)).thenReturn(Optional.of(condo));
+        when(unitRepository.findById(1L)).thenReturn(Optional.of(unit));
+        assertThrows(BusinessException.class, () ->
+                authService.register(new RegisterRequest("User", "a@b.com", "senha", "123.456.789-01", null, 1L, 1L)));
+    }
+
+    @Test
+    void refreshToken_throwsWhenExpired() {
+        RefreshToken token = RefreshToken.builder().expiresAt(Instant.now().minusSeconds(1)).revoked(false).build();
+        when(refreshTokenRepository.findByToken("expired")).thenReturn(Optional.of(token));
+        assertThrows(BusinessException.class, () -> authService.refreshToken("expired"));
+    }
+
+    @Test
+    void getCurrentUserByUuid_returnsUserInfo() {
+        UUID uuid = UUID.randomUUID();
+        User user = User.builder().id(1L).uuid(uuid).email("a@b.com").name("User").condominiumRoles(List.of()).build();
+        when(userRepository.findByUuid(uuid)).thenReturn(Optional.of(user));
+        UserInfoResponse r = authService.getCurrentUserByUuid(uuid.toString());
+        assertEquals("a@b.com", r.email());
+    }
+
+    @Test
+    void getCurrentUserByUuid_throwsWhenNotFound() {
+        when(userRepository.findByUuid(any())).thenReturn(Optional.empty());
+        assertThrows(BusinessException.class, () -> authService.getCurrentUserByUuid(UUID.randomUUID().toString()));
+    }
+
+    @Test
+    void updateMyProfile_updatesPhone() {
+        UUID userUuid = UUID.randomUUID();
+        User user = User.builder().id(1L).uuid(userUuid).email("a@b.com").name("User").phone(null).condominiumRoles(List.of()).build();
+        when(userRepository.findByUuid(userUuid)).thenReturn(Optional.of(user));
+        when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        UserInfoResponse r = authService.updateMyProfile(userUuid.toString(), new UpdateMyProfileRequest(null, "11999999999"));
+        assertEquals("11999999999", r.phone());
+    }
+
+    @Test
+    void logoutByUuid_throwsWhenUserNotFound() {
+        when(userRepository.findByUuid(any())).thenReturn(Optional.empty());
+        assertThrows(BusinessException.class, () -> authService.logoutByUuid(UUID.randomUUID().toString()));
+    }
+
+    @Test
+    void resetPassword_throwsWhenTokenExpired() {
+        PasswordResetToken token = PasswordResetToken.builder().used(false).expiresAt(Instant.now().minusSeconds(1)).build();
+        when(passwordResetTokenRepository.findByToken("t")).thenReturn(Optional.of(token));
+        assertThrows(BusinessException.class, () -> authService.resetPassword(new ResetPasswordRequest("t", "p")));
+    }
 }

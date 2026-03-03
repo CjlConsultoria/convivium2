@@ -101,4 +101,14 @@ describe('validators', () => {
       expect(minLength('ab', 3)).toBe(false)
     })
   })
+
+  describe('edge cases', () => {
+    it('isValidEmail com subdomínio', () => {
+      expect(isValidEmail('user@mail.example.com')).toBe(true)
+    })
+
+    it('isValidPhone com 10 dígitos', () => {
+      expect(isValidPhone('1133334444')).toBe(true)
+    })
+  })
 })
