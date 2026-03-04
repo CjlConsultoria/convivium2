@@ -14,4 +14,8 @@ public interface PlatformInvoiceRepository extends JpaRepository<PlatformInvoice
     Optional<PlatformInvoice> findByCondominiumIdAndReferenceMonth(Long condominiumId, String referenceMonth);
 
     Optional<PlatformInvoice> findByStripeSessionId(String stripeSessionId);
+
+    List<PlatformInvoice> findByStatus(String status);
+
+    List<PlatformInvoice> findByCondominiumIdAndStatusIn(Long condominiumId, List<String> statuses);
 }

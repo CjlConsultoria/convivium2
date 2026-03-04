@@ -57,6 +57,45 @@ public class PaymentController {
     }
 
     /**
+     * Cria uma sessao de Checkout Stripe Embedded e retorna o clientSecret.
+     * O frontend usa este clientSecret com @stripe/stripe-js para exibir o checkout inline.
+     */
+    @PostMapping("/embedded-checkout")
+    @PreAuthorize("hasRole('SINDICO') or hasRole('PLATFORM_ADMIN')")
+    public ResponseEntity<ApiResponse<Map<String, String>>> createEmbeddedCheckout(
+            @PathVariable Long condoId,
+            @RequestBody(required = false) Map<String, Object> body) {
+
+        Long planId = null;
+        if (body != null && body.get("planId") != null) {
+            planId = Long.valueOf(body.get("planId").toString());
+        }
+        if (planId == null) {
+            planId = condominiumRepository.findById(condoId)
+                    .filter(c -> c.getPlan() != null)
+                    .map(c -> c.getPlan().getId())
+                    .orElse(null);
+        }
+        if (planId == null) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Condominio sem plano associado. Informe planId ou associe um plano.", "MISSING_PLAN"));
+        }
+
+        String clientSecret = stripeService.createEmbeddedCheckoutSession(condoId, planId);
+        return ResponseEntity.ok(ApiResponse.ok(Map.of("clientSecret", clientSecret)));
+    }
+
+    /**
+     * Retorna a publishable key do Stripe para uso no frontend.
+     */
+    @GetMapping("/stripe-key")
+    @PreAuthorize("hasRole('SINDICO') or hasRole('PLATFORM_ADMIN')")
+    public ResponseEntity<ApiResponse<Map<String, String>>> getStripeKey() {
+        String key = stripeService.getPublishableKey();
+        return ResponseEntity.ok(ApiResponse.ok(Map.of("publishableKey", key)));
+    }
+
+    /**
      * Lista as faturas da plataforma (mensalidade do plano) do condomínio.
      * Atualizadas via webhook Stripe quando o pagamento é confirmado.
      */

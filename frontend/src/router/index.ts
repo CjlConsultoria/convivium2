@@ -27,6 +27,18 @@ const router = createRouter({
       meta: { layout: 'default' },
     },
     {
+      path: '/blocked',
+      name: 'Blocked',
+      component: () => import('@/views/billing/GeneralBlockedView.vue'),
+      meta: { layout: 'minimal' },
+    },
+    {
+      path: '/faq',
+      name: 'FaqPublic',
+      component: () => import('@/views/support/FaqView.vue'),
+      meta: { layout: 'default' },
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       component: () => import('@/views/NotFoundView.vue'),

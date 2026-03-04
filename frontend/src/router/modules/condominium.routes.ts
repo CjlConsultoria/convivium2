@@ -151,6 +151,33 @@ const condominiumRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/settings/CondoSettingsView.vue'),
     meta: { layout: 'default', roles: STAFF_ROLES },
   },
+  // ---- Payment (bloqueio por inadimplencia — sindico) ---------------------
+  {
+    path: '/c/:condoId/payment',
+    name: 'PaymentBlocked',
+    component: () => import('@/views/billing/PaymentBlockedView.vue'),
+    meta: { layout: 'minimal' },
+  },
+  {
+    path: '/c/:condoId/payment/return',
+    name: 'PaymentReturn',
+    component: () => import('@/views/billing/PaymentReturnView.vue'),
+    meta: { layout: 'minimal' },
+  },
+  // ---- FAQ ---------------------------------------------------------------
+  {
+    path: '/c/:condoId/faq',
+    name: 'FaqView',
+    component: () => import('@/views/support/FaqView.vue'),
+    meta: { layout: 'default' },
+  },
+  // ---- Suporte (chat) ----------------------------------------------------
+  {
+    path: '/c/:condoId/support',
+    name: 'SupportChat',
+    component: () => import('@/views/support/SupportChatView.vue'),
+    meta: { layout: 'default' },
+  },
 ]
 
 export default condominiumRoutes

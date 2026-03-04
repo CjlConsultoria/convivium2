@@ -81,6 +81,19 @@ public class Condominium {
     @Builder.Default
     private String status = "PENDING";
 
+    /** PAYMENT = bloqueio por inadimplencia, GENERAL = bloqueio total pelo admin */
+    @Column(name = "block_type", length = 20)
+    private String blockType;
+
+    @Column(name = "blocked_at")
+    private Instant blockedAt;
+
+    @Column(name = "blocked_reason", columnDefinition = "TEXT")
+    private String blockedReason;
+
+    @Column(name = "subscription_started_at")
+    private Instant subscriptionStartedAt;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

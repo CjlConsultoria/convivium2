@@ -10,12 +10,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +28,11 @@ public class TenantFilter extends OncePerRequestFilter {
 
     private static final Pattern CONDO_PATH_PATTERN =
             Pattern.compile("/api/v1/condos/(\\d+)(/.*)?");
+
+    /** Rotas que o sindico pode acessar quando bloqueado por PAYMENT */
+    private static final Set<String> PAYMENT_ALLOWED_PREFIXES = Set.of(
+            "/payment", "/payment/"
+    );
 
     private final CondominiumRepository condominiumRepository;
 
@@ -44,14 +51,51 @@ public class TenantFilter extends OncePerRequestFilter {
                 Long condoIdFromPath = extractCondoIdFromPath(request.getRequestURI());
 
                 if (condoIdFromPath != null) {
-                    // Condominio suspenso (inadimplencia): bloqueia acesso de todos exceto admin
                     Optional<Condominium> condoOpt = condominiumRepository.findById(condoIdFromPath);
-                    if (condoOpt.isPresent() && "SUSPENDED".equals(condoOpt.get().getStatus())) {
-                        if (!userPrincipal.isPlatformAdmin()) {
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write("{\"success\":false,\"message\":\"Condominio suspenso. Regularize sua situacao para acessar.\",\"code\":\"CONDOMINIUM_SUSPENDED\"}");
-                            return;
+
+                    if (condoOpt.isPresent()) {
+                        Condominium condo = condoOpt.get();
+                        String subPath = extractSubPath(request.getRequestURI());
+
+                        // 1) Bloqueio GENERAL: apenas PLATFORM_ADMIN acessa
+                        if ("GENERAL".equals(condo.getBlockType())) {
+                            if (!userPrincipal.isPlatformAdmin()) {
+                                writeBlockedResponse(response,
+                                        "Condominio bloqueado. Entre em contato com a plataforma.",
+                                        "CONDOMINIUM_GENERAL_BLOCKED");
+                                return;
+                            }
+                        }
+
+                        // 2) Bloqueio PAYMENT: PLATFORM_ADMIN acessa tudo;
+                        //    SINDICO acessa somente /payment/** e /api/v1/auth/me
+                        if ("PAYMENT".equals(condo.getBlockType())) {
+                            if (!userPrincipal.isPlatformAdmin()) {
+                                boolean isSindico = userPrincipal.getAuthorities()
+                                        .contains(new SimpleGrantedAuthority("ROLE_SINDICO"));
+
+                                boolean isPaymentRoute = subPath != null && isPaymentAllowedRoute(subPath);
+                                boolean isAuthMe = request.getRequestURI().equals("/api/v1/auth/me");
+
+                                if (isSindico && (isPaymentRoute || isAuthMe)) {
+                                    // Sindico pode acessar rotas de pagamento — continua
+                                } else {
+                                    writeBlockedResponse(response,
+                                            "Condominio bloqueado por inadimplencia. Regularize o pagamento.",
+                                            "CONDOMINIUM_PAYMENT_BLOCKED");
+                                    return;
+                                }
+                            }
+                        }
+
+                        // 3) Manter bloqueio por status SUSPENDED (legacy)
+                        if ("SUSPENDED".equals(condo.getStatus())) {
+                            if (!userPrincipal.isPlatformAdmin()) {
+                                writeBlockedResponse(response,
+                                        "Condominio suspenso. Regularize sua situacao para acessar.",
+                                        "CONDOMINIUM_SUSPENDED");
+                                return;
+                            }
                         }
                     }
 
@@ -92,5 +136,31 @@ public class TenantFilter extends OncePerRequestFilter {
             }
         }
         return null;
+    }
+
+    private String extractSubPath(String uri) {
+        Matcher matcher = CONDO_PATH_PATTERN.matcher(uri);
+        if (matcher.matches()) {
+            return matcher.group(2); // e.g., "/payment/checkout-session"
+        }
+        return null;
+    }
+
+    private boolean isPaymentAllowedRoute(String subPath) {
+        for (String prefix : PAYMENT_ALLOWED_PREFIXES) {
+            if (subPath.equals(prefix) || subPath.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void writeBlockedResponse(HttpServletResponse response, String message, String code)
+            throws IOException {
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(
+                String.format("{\"success\":false,\"message\":\"%s\",\"code\":\"%s\"}", message, code)
+        );
     }
 }

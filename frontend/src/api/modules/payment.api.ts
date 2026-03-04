@@ -30,3 +30,23 @@ export async function listInvoices(
   )
   return response.data
 }
+
+export async function createEmbeddedCheckout(
+  condoId: number,
+  planId?: number,
+): Promise<ApiResponse<{ clientSecret: string }>> {
+  const response = await apiClient.post<ApiResponse<{ clientSecret: string }>>(
+    `/condos/${condoId}/payment/embedded-checkout`,
+    planId != null ? { planId } : {},
+  )
+  return response.data
+}
+
+export async function getStripeKey(
+  condoId: number,
+): Promise<ApiResponse<{ publishableKey: string }>> {
+  const response = await apiClient.get<ApiResponse<{ publishableKey: string }>>(
+    `/condos/${condoId}/payment/stripe-key`,
+  )
+  return response.data
+}

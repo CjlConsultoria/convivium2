@@ -115,7 +115,100 @@ public class StripeService {
     }
 
     /**
+     * Cria uma sessao de Checkout Stripe Embedded (retorna clientSecret ao inves de URL).
+     * O checkout eh exibido inline no frontend via @stripe/stripe-js.
+     */
+    @Transactional
+    public String createEmbeddedCheckoutSession(Long condominiumId, Long planId) {
+        if (!stripeProperties.isEnabled() || stripeProperties.getSecretKey() == null || stripeProperties.getSecretKey().isBlank()) {
+            throw new BusinessException("Pagamentos Stripe nao estao configurados.", "STRIPE_NOT_CONFIGURED");
+        }
+
+        Condominium condo = condominiumRepository.findById(condominiumId)
+                .orElseThrow(() -> new BusinessException("Condominio nao encontrado", "CONDOMINIUM_NOT_FOUND"));
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new BusinessException("Plano nao encontrado", "PLAN_NOT_FOUND"));
+
+        if (condo.getPlan() == null || !condo.getPlan().getId().equals(planId)) {
+            throw new BusinessException("O plano informado nao e o plano atual do condominio.", "PLAN_MISMATCH");
+        }
+
+        String referenceMonth = YearMonth.now().format(REF_MONTH);
+        PlatformInvoice invoice = platformInvoiceRepository
+                .findByCondominiumIdAndReferenceMonth(condominiumId, referenceMonth)
+                .orElseGet(() -> {
+                    PlatformInvoice newInv = PlatformInvoice.builder()
+                            .condominium(condo)
+                            .plan(plan)
+                            .referenceMonth(referenceMonth)
+                            .amountCents(plan.getPriceCents())
+                            .status("PENDING")
+                            .build();
+                    return platformInvoiceRepository.save(newInv);
+                });
+
+        if ("PAID".equals(invoice.getStatus())) {
+            throw new BusinessException("Esta fatura ja foi paga.", "INVOICE_ALREADY_PAID");
+        }
+
+        String returnUrl = stripeProperties.getReturnUrl()
+                .replace("{condoId}", String.valueOf(condominiumId));
+
+        SessionCreateParams params = SessionCreateParams.builder()
+                .setMode(SessionCreateParams.Mode.PAYMENT)
+                .setUiMode(SessionCreateParams.UiMode.EMBEDDED)
+                .setReturnUrl(returnUrl)
+                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BOLETO)
+                .putMetadata("condominiumId", String.valueOf(condominiumId))
+                .putMetadata("planId", String.valueOf(planId))
+                .putMetadata("referenceMonth", referenceMonth)
+                .putMetadata("platformInvoiceId", String.valueOf(invoice.getId()))
+                .addLineItem(
+                        SessionCreateParams.LineItem.builder()
+                                .setQuantity(1L)
+                                .setPriceData(
+                                        SessionCreateParams.LineItem.PriceData.builder()
+                                                .setCurrency("brl")
+                                                .setUnitAmount((long) plan.getPriceCents())
+                                                .setProductData(
+                                                        SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                                                .setName("Mensalidade Convivium - " + plan.getName())
+                                                                .setDescription("Referencia " + referenceMonth)
+                                                                .build()
+                                                )
+                                                .build()
+                                )
+                                .build()
+                )
+                .build();
+
+        try {
+            com.stripe.Stripe.apiKey = stripeProperties.getSecretKey();
+            Session session = Session.create(params);
+            invoice.setStripeSessionId(session.getId());
+            platformInvoiceRepository.save(invoice);
+            return session.getClientSecret();
+        } catch (StripeException e) {
+            log.error("Stripe embedded checkout session creation failed", e);
+            throw new BusinessException("Nao foi possivel criar a sessao de pagamento: " + e.getMessage(), "STRIPE_ERROR");
+        }
+    }
+
+    /**
+     * Retorna a publishable key do Stripe para uso no frontend.
+     */
+    public String getPublishableKey() {
+        if (!stripeProperties.isEnabled() || stripeProperties.getPublishableKey() == null || stripeProperties.getPublishableKey().isBlank()) {
+            throw new BusinessException("Stripe nao esta configurado.", "STRIPE_NOT_CONFIGURED");
+        }
+        return stripeProperties.getPublishableKey();
+    }
+
+    /**
      * Processa evento do webhook (checkout.session.completed ou invoice.paid) e marca fatura como paga.
+     * Se o condominio estiver bloqueado por pagamento, desbloqueia automaticamente.
+     * Se for o primeiro pagamento, atualiza subscriptionStartedAt.
      */
     @Transactional
     public void handleCheckoutSessionCompleted(String sessionId) {
@@ -124,6 +217,23 @@ public class StripeService {
             inv.setPaidAt(java.time.Instant.now());
             platformInvoiceRepository.save(inv);
             log.info("Platform invoice {} marked as PAID (session {})", inv.getId(), sessionId);
+
+            // Desbloquear condominio se bloqueado por pagamento
+            Condominium condo = inv.getCondominium();
+            if (condo != null && "PAYMENT".equals(condo.getBlockType())) {
+                condo.setBlockType(null);
+                condo.setBlockedAt(null);
+                condo.setBlockedReason(null);
+                condominiumRepository.save(condo);
+                log.info("Condominium {} unblocked after payment (session {})", condo.getId(), sessionId);
+            }
+
+            // Atualizar subscriptionStartedAt se primeiro pagamento
+            if (condo != null && condo.getSubscriptionStartedAt() == null) {
+                condo.setSubscriptionStartedAt(java.time.Instant.now());
+                condominiumRepository.save(condo);
+                log.info("Condominium {} subscription started at {}", condo.getId(), condo.getSubscriptionStartedAt());
+            }
         });
     }
 }

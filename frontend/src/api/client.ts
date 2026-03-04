@@ -46,6 +46,24 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 403) {
       const code = (error.response?.data as { code?: string })?.code
+
+      if (code === 'CONDOMINIUM_PAYMENT_BLOCKED') {
+        // Sindico e redirecionado para pagina de pagamento; demais para blocked
+        const condoMatch = originalRequest.url?.match(/\/condos\/(\d+)/)
+        const condoId = condoMatch?.[1]
+        if (condoId) {
+          window.location.href = `/c/${condoId}/payment`
+        } else {
+          window.location.href = '/blocked'
+        }
+        return Promise.reject(error)
+      }
+
+      if (code === 'CONDOMINIUM_GENERAL_BLOCKED') {
+        window.location.href = '/blocked'
+        return Promise.reject(error)
+      }
+
       if (code === 'CONDOMINIUM_SUSPENDED') {
         const msg = (error.response?.data as { message?: string })?.message || 'Condominio suspenso. Regularize sua situacao para acessar.'
         window.alert(msg)

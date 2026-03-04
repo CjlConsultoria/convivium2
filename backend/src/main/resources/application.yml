@@ -71,10 +71,12 @@ app:
   # Stripe (pagamentos). Chave em application-local.yml (perfil "local"). Ver docs/STRIPE-CONFIG.md.
   stripe:
     enabled: false
-    secret-key: ""       # ou use perfil "local" com application-local.yml
-    webhook-secret: ""   # whsec_... (assinatura do webhook)
+    secret-key: ""          # sk_test_... ou use perfil "local" com application-local.yml
+    publishable-key: ""     # pk_test_... (usado pelo frontend para Stripe Embedded Checkout)
+    webhook-secret: ""      # whsec_... (assinatura do webhook)
     success-url: "http://localhost:5173/c/{condoId}/financial?payment=success"
     cancel-url: "http://localhost:5173/c/{condoId}/financial?payment=cancel"
+    return-url: "http://localhost:5173/c/{condoId}/payment/return?session_id={CHECKOUT_SESSION_ID}"
 
   storage:
     # local = pasta do sistema (desenvolvimento). s3 = S3/MinIO (produção, ex: Render)

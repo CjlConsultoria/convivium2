@@ -56,6 +56,27 @@ const adminRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/admin/AdminSettingsView.vue'),
     meta: { requiresAdmin: true, layout: 'admin' },
   },
+  // ---- Billing (admin) --------------------------------------------------
+  {
+    path: '/admin/billing',
+    name: 'AdminBilling',
+    component: () => import('@/views/admin/AdminBillingView.vue'),
+    meta: { requiresAdmin: true, layout: 'admin' },
+  },
+  // ---- FAQ (admin CRUD) -------------------------------------------------
+  {
+    path: '/admin/faq',
+    name: 'AdminFaq',
+    component: () => import('@/views/admin/AdminFaqView.vue'),
+    meta: { requiresAdmin: true, layout: 'admin' },
+  },
+  // ---- Support (admin chat) ---------------------------------------------
+  {
+    path: '/admin/support',
+    name: 'AdminSupport',
+    component: () => import('@/views/admin/AdminSupportView.vue'),
+    meta: { requiresAdmin: true, layout: 'admin' },
+  },
 ]
 
 export default adminRoutes
