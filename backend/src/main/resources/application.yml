@@ -55,7 +55,7 @@ app:
     client-id: ""  # Opcional: valida que o token veio do seu app (ex: xxx.apps.googleusercontent.com)
 
   cors:
-    allowed-origins: http://localhost:5173
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,https://convivium2.onrender.com}
     allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
     allowed-headers: "*"
 
@@ -68,15 +68,15 @@ app:
     template:
       encomenda: "encomenda_na_portaria"  # Nome do template aprovado no Meta
 
-  # Stripe (pagamentos). Chave em application-local.yml (perfil "local"). Ver docs/STRIPE-CONFIG.md.
+  # Stripe (pagamentos). Em produção, use variáveis de ambiente (STRIPE_SECRET_KEY etc.)
   stripe:
-    enabled: false
-    secret-key: ""          # sk_test_... ou use perfil "local" com application-local.yml
-    publishable-key: ""     # pk_test_... (usado pelo frontend para Stripe Embedded Checkout)
-    webhook-secret: ""      # whsec_... (assinatura do webhook)
-    success-url: "http://localhost:5173/c/{condoId}/financial?payment=success"
-    cancel-url: "http://localhost:5173/c/{condoId}/financial?payment=cancel"
-    return-url: "http://localhost:5173/c/{condoId}/payment/return?session_id={CHECKOUT_SESSION_ID}"
+    enabled: ${STRIPE_ENABLED:false}
+    secret-key: ${STRIPE_SECRET_KEY:}
+    publishable-key: ${STRIPE_PUBLISHABLE_KEY:}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET:}      # whsec_... (configurar após criar webhook no Stripe Dashboard)
+    success-url: "${APP_FRONTEND_URL:http://localhost:5173}/c/{condoId}/financial?payment=success"
+    cancel-url: "${APP_FRONTEND_URL:http://localhost:5173}/c/{condoId}/financial?payment=cancel"
+    return-url: "${APP_FRONTEND_URL:http://localhost:5173}/c/{condoId}/payment/return?session_id={CHECKOUT_SESSION_ID}"
 
   storage:
     # local = pasta do sistema (desenvolvimento). s3 = S3/MinIO (produção, ex: Render)
