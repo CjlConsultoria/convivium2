@@ -19,6 +19,10 @@ public record CondominiumResponse(
         String planName,
         Integer planPriceCents,
         String status,
+        String blockType,
+        String blockedAt,
+        String blockedReason,
+        String subscriptionStartedAt,
         String createdAt
 ) {
 }

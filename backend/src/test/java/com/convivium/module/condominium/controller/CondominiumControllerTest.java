@@ -54,7 +54,7 @@ class CondominiumControllerTest {
             1L, "Condo", "condo",
             null, null, null, null, null, null, null, null, null, null, null,  // cnpj..logoUrl (11)
             null, null, null,  // planId, planName, planPriceCents (3)
-            "ACTIVE", null
+            "ACTIVE", null, null, null, null, null
         );
         when(condominiumService.listAll(any())).thenReturn(new PageImpl<>(List.of(cr)));
         mockMvc.perform(get("/api/v1/admin/condominiums").with(withUserPrincipal(1L, 1L, "PLATFORM_ADMIN")))
@@ -67,7 +67,7 @@ class CondominiumControllerTest {
             1L, "Condo", "condo",
             null, null, null, null, null, null, null, null, null, null, null,  // cnpj..logoUrl (11)
             null, null, null,  // planId, planName, planPriceCents (3)
-            "ACTIVE", null
+            "ACTIVE", null, null, null, null, null
         );
         when(condominiumService.create(any())).thenReturn(cr);
         CondominiumCreateRequest req = new CondominiumCreateRequest("Condo", null, null, null, null, null, null, null, null, null, null);
@@ -85,7 +85,7 @@ class CondominiumControllerTest {
             1L, "Condo", "condo",
             null, null, null, null, null, null, null, null, null, null, null,  // cnpj..logoUrl (11)
             null, null, null,  // planId, planName, planPriceCents (3)
-            "ACTIVE", null
+            "ACTIVE", null, null, null, null, null
         );
         when(condominiumService.getById(1L)).thenReturn(cr);
         mockMvc.perform(get("/api/v1/admin/condominiums/1").with(withUserPrincipal(1L, 1L, "PLATFORM_ADMIN")))

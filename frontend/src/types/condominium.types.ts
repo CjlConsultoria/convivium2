@@ -19,6 +19,10 @@ export interface Condominium {
   planName: string | null
   planPriceCents: number | null
   status: CondominiumStatus
+  blockType: string | null
+  blockedAt: string | null
+  blockedReason: string | null
+  subscriptionStartedAt: string | null
   createdAt: string
 }
 

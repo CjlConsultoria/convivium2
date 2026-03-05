@@ -404,6 +404,10 @@ public class CondominiumService {
                 planName,
                 planPriceCents,
                 condo.getStatus(),
+                condo.getBlockType(),
+                condo.getBlockedAt() != null ? condo.getBlockedAt().toString() : null,
+                condo.getBlockedReason(),
+                condo.getSubscriptionStartedAt() != null ? condo.getSubscriptionStartedAt().toString() : null,
                 condo.getCreatedAt() != null ? condo.getCreatedAt().toString() : null
         );
     }

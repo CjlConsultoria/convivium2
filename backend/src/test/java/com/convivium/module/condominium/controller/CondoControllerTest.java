@@ -40,7 +40,7 @@ class CondoControllerTest {
             1L, "Condo Test", "condo-test",
             null, null, null, null, null, null, null, null, null, null, null,
             null, null, null,
-            "ACTIVE", null
+            "ACTIVE", null, null, null, null, null
         );
         when(condominiumService.getById(1L)).thenReturn(cr);
         mockMvc.perform(get("/api/v1/condos/1").with(withUserPrincipal()))

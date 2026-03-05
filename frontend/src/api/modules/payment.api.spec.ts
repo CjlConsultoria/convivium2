@@ -28,4 +28,22 @@ describe('payment.api', () => {
     await paymentApi.listInvoices(1)
     expect(apiClient.get).toHaveBeenCalledWith('/condos/1/payment/invoices')
   })
+
+  it('createEmbeddedCheckout chama POST', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { success: true, data: { clientSecret: 'cs_test_123' } } } as any)
+    await paymentApi.createEmbeddedCheckout(1)
+    expect(apiClient.post).toHaveBeenCalledWith('/condos/1/payment/embedded-checkout', {})
+  })
+
+  it('createEmbeddedCheckout com planId chama POST com planId', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { success: true, data: { clientSecret: 'cs_test_123' } } } as any)
+    await paymentApi.createEmbeddedCheckout(1, 3)
+    expect(apiClient.post).toHaveBeenCalledWith('/condos/1/payment/embedded-checkout', { planId: 3 })
+  })
+
+  it('getStripeKey chama GET', async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { success: true, data: { publishableKey: 'pk_test_abc' } } } as any)
+    await paymentApi.getStripeKey(1)
+    expect(apiClient.get).toHaveBeenCalledWith('/condos/1/payment/stripe-key')
+  })
 })

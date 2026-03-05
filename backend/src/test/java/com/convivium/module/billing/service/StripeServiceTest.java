@@ -118,6 +118,122 @@ class StripeServiceTest {
                 .hasMessageContaining("ja foi paga");
     }
 
+    // ---- createEmbeddedCheckoutSession ----
+
+    @Test
+    void createEmbeddedCheckoutSession_stripeNotEnabled_throws() {
+        when(stripeProperties.isEnabled()).thenReturn(false);
+
+        assertThatThrownBy(() -> stripeService.createEmbeddedCheckoutSession(1L, 1L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Stripe nao estao configurados");
+    }
+
+    @Test
+    void createEmbeddedCheckoutSession_condoNotFound_throws() {
+        when(stripeProperties.isEnabled()).thenReturn(true);
+        when(stripeProperties.getSecretKey()).thenReturn("sk_test_123");
+        when(condominiumRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> stripeService.createEmbeddedCheckoutSession(99L, 1L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Condominio nao encontrado");
+    }
+
+    @Test
+    void createEmbeddedCheckoutSession_planNotFound_throws() {
+        when(stripeProperties.isEnabled()).thenReturn(true);
+        when(stripeProperties.getSecretKey()).thenReturn("sk_test_123");
+
+        Condominium condo = new Condominium();
+        condo.setId(1L);
+        when(condominiumRepository.findById(1L)).thenReturn(Optional.of(condo));
+        when(planRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> stripeService.createEmbeddedCheckoutSession(1L, 99L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Plano nao encontrado");
+    }
+
+    @Test
+    void createEmbeddedCheckoutSession_planMismatch_throws() {
+        when(stripeProperties.isEnabled()).thenReturn(true);
+        when(stripeProperties.getSecretKey()).thenReturn("sk_test_123");
+
+        Plan condoPlan = new Plan();
+        condoPlan.setId(1L);
+        Condominium condo = new Condominium();
+        condo.setId(1L);
+        condo.setPlan(condoPlan);
+        when(condominiumRepository.findById(1L)).thenReturn(Optional.of(condo));
+
+        Plan otherPlan = new Plan();
+        otherPlan.setId(2L);
+        when(planRepository.findById(2L)).thenReturn(Optional.of(otherPlan));
+
+        assertThatThrownBy(() -> stripeService.createEmbeddedCheckoutSession(1L, 2L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("plano informado nao e o plano atual");
+    }
+
+    @Test
+    void createEmbeddedCheckoutSession_invoiceAlreadyPaid_throws() {
+        when(stripeProperties.isEnabled()).thenReturn(true);
+        when(stripeProperties.getSecretKey()).thenReturn("sk_test_123");
+
+        Plan plan = Plan.builder().id(1L).priceCents(9900).name("Basic").build();
+        Condominium condo = new Condominium();
+        condo.setId(1L);
+        condo.setPlan(plan);
+
+        when(condominiumRepository.findById(1L)).thenReturn(Optional.of(condo));
+        when(planRepository.findById(1L)).thenReturn(Optional.of(plan));
+
+        PlatformInvoice paidInvoice = PlatformInvoice.builder()
+                .id(10L)
+                .status("PAID")
+                .build();
+        when(platformInvoiceRepository.findByCondominiumIdAndReferenceMonth(any(), any()))
+                .thenReturn(Optional.of(paidInvoice));
+
+        assertThatThrownBy(() -> stripeService.createEmbeddedCheckoutSession(1L, 1L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("ja foi paga");
+    }
+
+    // ---- getPublishableKey ----
+
+    @Test
+    void getPublishableKey_returnsKey() {
+        when(stripeProperties.isEnabled()).thenReturn(true);
+        when(stripeProperties.getPublishableKey()).thenReturn("pk_test_abc");
+
+        String key = stripeService.getPublishableKey();
+
+        assertThat(key).isEqualTo("pk_test_abc");
+    }
+
+    @Test
+    void getPublishableKey_notEnabled_throws() {
+        when(stripeProperties.isEnabled()).thenReturn(false);
+
+        assertThatThrownBy(() -> stripeService.getPublishableKey())
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Stripe nao esta configurado");
+    }
+
+    @Test
+    void getPublishableKey_blankKey_throws() {
+        when(stripeProperties.isEnabled()).thenReturn(true);
+        when(stripeProperties.getPublishableKey()).thenReturn("");
+
+        assertThatThrownBy(() -> stripeService.getPublishableKey())
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Stripe nao esta configurado");
+    }
+
+    // ---- handleCheckoutSessionCompleted ----
+
     @Test
     void handleCheckoutSessionCompleted_marksInvoiceAsPaid() {
         PlatformInvoice inv = PlatformInvoice.builder()
@@ -132,6 +248,53 @@ class StripeServiceTest {
         assertThat(inv.getStatus()).isEqualTo("PAID");
         assertThat(inv.getPaidAt()).isNotNull();
         verify(platformInvoiceRepository).save(inv);
+    }
+
+    @Test
+    void handleCheckoutSessionCompleted_unblocksCondoWithPaymentBlock() {
+        Condominium condo = new Condominium();
+        condo.setId(1L);
+        condo.setBlockType("PAYMENT");
+        condo.setBlockedAt(java.time.Instant.now());
+        condo.setBlockedReason("Inadimplencia");
+        condo.setSubscriptionStartedAt(java.time.Instant.now()); // already has subscription
+
+        PlatformInvoice inv = PlatformInvoice.builder()
+                .id(1L)
+                .status("PENDING")
+                .condominium(condo)
+                .build();
+        when(platformInvoiceRepository.findByStripeSessionId("sess_456")).thenReturn(Optional.of(inv));
+        when(platformInvoiceRepository.save(any())).thenReturn(inv);
+        when(condominiumRepository.save(any())).thenReturn(condo);
+
+        stripeService.handleCheckoutSessionCompleted("sess_456");
+
+        assertThat(condo.getBlockType()).isNull();
+        assertThat(condo.getBlockedAt()).isNull();
+        assertThat(condo.getBlockedReason()).isNull();
+        verify(condominiumRepository).save(condo);
+    }
+
+    @Test
+    void handleCheckoutSessionCompleted_setsSubscriptionStartedAtOnFirstPayment() {
+        Condominium condo = new Condominium();
+        condo.setId(1L);
+        condo.setSubscriptionStartedAt(null); // first payment
+
+        PlatformInvoice inv = PlatformInvoice.builder()
+                .id(1L)
+                .status("PENDING")
+                .condominium(condo)
+                .build();
+        when(platformInvoiceRepository.findByStripeSessionId("sess_789")).thenReturn(Optional.of(inv));
+        when(platformInvoiceRepository.save(any())).thenReturn(inv);
+        when(condominiumRepository.save(any())).thenReturn(condo);
+
+        stripeService.handleCheckoutSessionCompleted("sess_789");
+
+        assertThat(condo.getSubscriptionStartedAt()).isNotNull();
+        verify(condominiumRepository).save(condo);
     }
 
     @Test
