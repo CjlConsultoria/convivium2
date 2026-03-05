@@ -9,6 +9,7 @@ import com.convivium.module.condominium.dto.ApplyStructureRequest;
 import com.convivium.module.condominium.dto.GenerateStructureRequest;
 import com.convivium.module.condominium.dto.StructurePreviewResponse;
 import com.convivium.module.condominium.dto.CondominiumResponse;
+import com.convivium.module.condominium.dto.PlanResponse;
 import com.convivium.module.condominium.dto.UnitCreateRequest;
 import com.convivium.module.condominium.dto.UnitResidentInfo;
 import com.convivium.module.condominium.dto.UnitResponse;
@@ -119,7 +120,16 @@ public class CondominiumService {
         condominiumRepository.save(condominium);
     }
 
-    /** Associa um plano ao condominio (admin). */
+    /** Lista planos ativos disponiveis. */
+    @Transactional(readOnly = true)
+    public List<PlanResponse> listAvailablePlans() {
+        return planRepository.findByActiveTrueOrderByName().stream()
+                .map(p -> new PlanResponse(p.getId(), p.getName(), p.getSlug(),
+                        p.getPriceCents(), p.getDescription(), p.getMaxUnits(), p.getMaxUsers(), p.getActive()))
+                .toList();
+    }
+
+    /** Associa um plano ao condominio. */
     public CondominiumResponse setPlan(Long condominiumId, Long planId) {
         Condominium condominium = condominiumRepository.findById(condominiumId)
                 .orElseThrow(() -> new ResourceNotFoundException("Condominio", condominiumId));

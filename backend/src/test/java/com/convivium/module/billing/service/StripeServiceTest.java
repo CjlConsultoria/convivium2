@@ -73,7 +73,7 @@ class StripeServiceTest {
     }
 
     @Test
-    void createCheckoutSession_planMismatch_throws() {
+    void createCheckoutSession_planMismatch_autoAssignsPlan() {
         when(stripeProperties.isEnabled()).thenReturn(true);
         when(stripeProperties.getSecretKey()).thenReturn("sk_test_123");
 
@@ -83,14 +83,22 @@ class StripeServiceTest {
         condo.setId(1L);
         condo.setPlan(condoPlan);
         when(condominiumRepository.findById(1L)).thenReturn(Optional.of(condo));
+        when(condominiumRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        Plan otherPlan = new Plan();
-        otherPlan.setId(2L);
+        Plan otherPlan = Plan.builder().id(2L).priceCents(19900).name("Pro").build();
         when(planRepository.findById(2L)).thenReturn(Optional.of(otherPlan));
 
+        PlatformInvoice paidInvoice = PlatformInvoice.builder().id(10L).status("PAID").build();
+        when(platformInvoiceRepository.findByCondominiumIdAndReferenceMonth(any(), any()))
+                .thenReturn(Optional.of(paidInvoice));
+
+        // Will throw INVOICE_ALREADY_PAID after auto-assigning, but plan should be changed
         assertThatThrownBy(() -> stripeService.createCheckoutSession(1L, 2L, true))
                 .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("plano informado nao e o plano atual");
+                .hasMessageContaining("ja foi paga");
+
+        assertThat(condo.getPlan()).isEqualTo(otherPlan);
+        verify(condominiumRepository).save(condo);
     }
 
     @Test
@@ -156,7 +164,7 @@ class StripeServiceTest {
     }
 
     @Test
-    void createEmbeddedCheckoutSession_planMismatch_throws() {
+    void createEmbeddedCheckoutSession_planMismatch_autoAssignsPlan() {
         when(stripeProperties.isEnabled()).thenReturn(true);
         when(stripeProperties.getSecretKey()).thenReturn("sk_test_123");
 
@@ -166,14 +174,21 @@ class StripeServiceTest {
         condo.setId(1L);
         condo.setPlan(condoPlan);
         when(condominiumRepository.findById(1L)).thenReturn(Optional.of(condo));
+        when(condominiumRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        Plan otherPlan = new Plan();
-        otherPlan.setId(2L);
+        Plan otherPlan = Plan.builder().id(2L).priceCents(19900).name("Pro").build();
         when(planRepository.findById(2L)).thenReturn(Optional.of(otherPlan));
+
+        PlatformInvoice paidInvoice = PlatformInvoice.builder().id(10L).status("PAID").build();
+        when(platformInvoiceRepository.findByCondominiumIdAndReferenceMonth(any(), any()))
+                .thenReturn(Optional.of(paidInvoice));
 
         assertThatThrownBy(() -> stripeService.createEmbeddedCheckoutSession(1L, 2L))
                 .isInstanceOf(BusinessException.class)
-                .hasMessageContaining("plano informado nao e o plano atual");
+                .hasMessageContaining("ja foi paga");
+
+        assertThat(condo.getPlan()).isEqualTo(otherPlan);
+        verify(condominiumRepository).save(condo);
     }
 
     @Test

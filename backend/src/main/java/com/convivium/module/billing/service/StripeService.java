@@ -48,8 +48,10 @@ public class StripeService {
         Plan plan = planRepository.findById(planId)
                 .orElseThrow(() -> new BusinessException("Plano nao encontrado", "PLAN_NOT_FOUND"));
 
+        // Auto-atribuir plano se diferente do atual (sindico selecionou novo plano)
         if (condo.getPlan() == null || !condo.getPlan().getId().equals(planId)) {
-            throw new BusinessException("O plano informado nao e o plano atual do condominio.", "PLAN_MISMATCH");
+            condo.setPlan(plan);
+            condominiumRepository.save(condo);
         }
 
         String referenceMonth = YearMonth.now().format(REF_MONTH);
@@ -129,8 +131,10 @@ public class StripeService {
         Plan plan = planRepository.findById(planId)
                 .orElseThrow(() -> new BusinessException("Plano nao encontrado", "PLAN_NOT_FOUND"));
 
+        // Auto-atribuir plano se diferente do atual
         if (condo.getPlan() == null || !condo.getPlan().getId().equals(planId)) {
-            throw new BusinessException("O plano informado nao e o plano atual do condominio.", "PLAN_MISMATCH");
+            condo.setPlan(plan);
+            condominiumRepository.save(condo);
         }
 
         String referenceMonth = YearMonth.now().format(REF_MONTH);

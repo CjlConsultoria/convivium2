@@ -82,6 +82,24 @@ export async function listPlans(): Promise<ApiResponse<Plan[]>> {
 
 // ---- Tenant-scoped endpoints (within a condominium) ----
 
+/** Lista planos ativos disponiveis (endpoint tenant-scoped, acessivel pelo sindico). */
+export async function listAvailablePlans(condoId: number): Promise<ApiResponse<Plan[]>> {
+  const response = await apiClient.get<ApiResponse<Plan[]>>(`/condos/${condoId}/plans`)
+  return response.data
+}
+
+/** Sindico seleciona/altera o plano do condominio. */
+export async function selectPlan(
+  condoId: number,
+  planId: number,
+): Promise<ApiResponse<Condominium>> {
+  const response = await apiClient.patch<ApiResponse<Condominium>>(
+    `/condos/${condoId}/plan`,
+    { planId },
+  )
+  return response.data
+}
+
 export async function listBuildings(condoId: number): Promise<ApiResponse<Building[]>> {
   const response = await apiClient.get<ApiResponse<Building[]>>(
     `/condos/${condoId}/buildings`,
