@@ -14,29 +14,29 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "vue": "^3.5.13",
-    "vue-router": "^4.5.0",
-    "pinia": "^2.3.0",
-    "axios": "^1.7.9",
-    "@vueuse/core": "^12.4.0",
-    "@stripe/stripe-js": "^8.9.0",
-    "express": "^4.21.0",
+    "vue": "^3.5.31",
+    "vue-router": "^5.0.4",
+    "pinia": "^3.0.4",
+    "axios": "^1.14.0",
+    "@vueuse/core": "^14.2.1",
+    "@stripe/stripe-js": "^9.0.1",
+    "express": "^5.2.1",
     "chart.js": "^4.4.7",
     "vue-chartjs": "^5.3.2",
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.20"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "~2.1.8",
+    "@vitest/coverage-v8": "~4.1.2",
     "@vue/test-utils": "^2.4.6",
-    "jsdom": "^25.0.1",
-    "vitest": "~2.1.8",
-    "@vitejs/plugin-vue": "^5.2.1",
-    "typescript": "~5.6.3",
-    "vite": "^6.0.7",
-    "vue-tsc": "^2.2.0",
-    "tailwindcss": "~3.4.17",
+    "jsdom": "^29.0.1",
+    "vitest": "~4.1.2",
+    "@vitejs/plugin-vue": "^6.0.5",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.3",
+    "vue-tsc": "^3.2.6",
+    "tailwindcss": "~4.2.2",
     "postcss": "^8.4.49",
-    "autoprefixer": "^10.4.20",
-    "@types/node": "^22.10.5"
+    "autoprefixer": "^10.4.27",
+    "@types/node": "^25.5.0"
   }
 }
