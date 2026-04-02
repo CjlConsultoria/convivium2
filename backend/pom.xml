@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.12</version>
+        <version>4.0.5</version>
         <relativePath/>
     </parent>
 
@@ -19,10 +19,10 @@
 
     <properties>
         <java.version>21</java.version>
-        <lombok.version>1.18.34</lombok.version>
-        <jjwt.version>0.12.6</jjwt.version>
+        <lombok.version>1.18.44</lombok.version>
+        <jjwt.version>0.13.0</jjwt.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-        <springdoc.version>2.6.0</springdoc.version>
+        <springdoc.version>3.0.2</springdoc.version>
         <!-- Overrides para corrigir vulnerabilidades (Trivy) -->
         <postgresql.version>42.7.7</postgresql.version>
         <tomcat.version>10.1.45</tomcat.version>
@@ -117,14 +117,14 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
-            <version>2.29.1</version>
+            <version>2.42.26</version>
         </dependency>
 
         <!-- Stripe -->
         <dependency>
             <groupId>com.stripe</groupId>
             <artifactId>stripe-java</artifactId>
-            <version>28.3.0</version>
+            <version>32.0.0</version>
         </dependency>
 
         <!-- Testing -->
@@ -145,7 +145,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>3.3.12</version>
+                <version>4.0.5</version>
                 <configuration>
                     <excludes>
                         <exclude>
@@ -165,7 +165,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.14</version>
                 <executions>
                     <execution>
                         <goals>
